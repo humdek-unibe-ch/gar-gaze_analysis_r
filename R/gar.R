@@ -1,14 +1,13 @@
-gar_create <- function( params = NULL )
-{
-    return( .Call( "gar_create", params ) )
-}
-
-gar_get_filter_parameter <- function( h )
-{
-    return( .Call( "gar_get_filter_parameter", h ) )
-}
-
-gar_get_filter_parameter_default <- function()
-{
-    return( .Call( "gar_get_filter_parameter_default" ) )
-}
+#' gar: R bindings for the gaze analysis C library libgac.
+#'
+#' The library allow to perform basic gaze analysis.
+#' - Sample filtering with moving average
+#' - Sample gap fill-in through linear interpolation (lerp)
+#' - Fixation detection with I-DT algorithm
+#' - Saccade detection with I-VT algorithm
+#'
+#' @docType package
+#' @name gar
+#' @useDynLib gar
+NULL
+#> NULL

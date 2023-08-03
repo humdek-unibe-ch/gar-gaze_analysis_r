@@ -8,4 +8,4 @@ Maintainer: Simon Maurer <simon.maurer@unibe.ch>
 Description: A package to wrap the gaze analysis library (gac) written in C.
 License: GPL (>= 2)
 Depends: R (>= 2.14)
-Collate: gar.R
+RoxygenNote: 7.2.3
