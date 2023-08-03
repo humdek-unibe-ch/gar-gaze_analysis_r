@@ -1,4 +1,4 @@
-#include "gac_wrapper.h"
+#include "wrapper.h"
 
 static SEXP gac_type_tag;
 
