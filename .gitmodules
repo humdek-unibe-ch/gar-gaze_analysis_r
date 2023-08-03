@@ -1,0 +1,3 @@
+[submodule "src/gac"]
+	path = src/gac
+	url = http://tpf.fluido.as:10012/LIB/LIB-gaze_analysis_c.git

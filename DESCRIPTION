@@ -1,0 +1,11 @@
+Package: gar
+Type: Package
+Title: Wrapper for the C library gaze analysis (gac)
+Version: 0.1.0
+Date: 2023-08-02
+Author: Simon Maurer <simon.maurer@unibe.ch>
+Maintainer: Simon Maurer <simon.maurer@unibe.ch>
+Description: A package to wrap the gaze analysis library (gac) written in C.
+License: GPL (>= 2)
+Depends: R (>= 2.14)
+Collate: gar.R
