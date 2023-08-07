@@ -3,4 +3,5 @@
 export(gar_create)
 export(gar_get_filter_parameter)
 export(gar_get_filter_parameter_default)
+export(gar_parse)
 useDynLib(gar)
