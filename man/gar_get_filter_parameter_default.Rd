@@ -7,7 +7,23 @@
 gar_get_filter_parameter_default()
 }
 \value{
-The default filter parameters on success or NULL on failure
+The default filter parameters on success or NULL on failure.
+ The parameters are structured as nested named lists:
+ - res$gap$max_gap_length:
+   The maximal allowed gap length to be filled-in. Set to zero to disable
+   gap fill-in filter.
+ - res$gap$sample_period:
+   The sample period to compute the number of required fill-in samples.
+ - res$noise$mid_idx:
+   The mid index of the moving average noise filter window. This is used to
+   compute the length of the window: window_length = mid_idx * 2 + 1. Set to
+   zero to disable noise filtering.
+ - res$fixation$duration_threshold:
+   The duration threshold in milliseconds.
+ - res$fixation$dispersion_threshold:
+   The dispersion threshold in degrees.
+ - res$saccade$velocity_threshold:
+   The velocity threshold in degrees per second.
 }
 \description{
 Get the default filter parameter values.
