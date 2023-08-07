@@ -13,6 +13,6 @@ h <- gar_create( params )
 new_params <- gar_get_filter_parameter( h )
 print(new_params)
 
-d <- read.csv('git-gaze_analysis_r/sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
-res <- gar_filter( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp)
+d <- read.csv('sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
+res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp)
 print(res)
