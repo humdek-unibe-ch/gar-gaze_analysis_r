@@ -9,13 +9,6 @@ static SEXP gac_type_tag;
 } while( 0 )
 
 /******************************************************************************/
-SEXP gar_init( void )
-{
-    gac_type_tag = install( "GAC_TYPE_TAG" );
-    return R_NilValue;
-}
-
-/******************************************************************************/
 SEXP gar_create( SEXP r_params )
 {
     void* h;
@@ -93,19 +86,6 @@ SEXP gar_create( SEXP r_params )
 }
 
 /******************************************************************************/
-SEXP gar_destroy( SEXP ptr )
-{
-    void* h;
-
-    CHECK_GAC_HANDLER( ptr );
-
-    h = R_ExternalPtrAddr( ptr );
-    gac_destroy( h );
-
-    return R_NilValue;
-}
-
-/******************************************************************************/
 SEXP gar_create_filter_parameter( gac_filter_parameter_t* params )
 {
     SEXP gap, noise, saccade, fixation, list;
@@ -137,28 +117,9 @@ SEXP gar_create_filter_parameter( gac_filter_parameter_t* params )
 }
 
 /******************************************************************************/
-SEXP gar_get_filter_parameter( SEXP ptr )
+SEXP gar_create_fixation_frame( gac_fixation_t* fixations, uint32_t count )
 {
-    void* h = R_ExternalPtrAddr( ptr );
-    gac_filter_parameter_t params;
-
-    gac_get_filter_parameter( h, &params );
-    return gar_create_filter_parameter( &params );
-}
-
-/******************************************************************************/
-SEXP gar_get_filter_parameter_default()
-{
-    gac_filter_parameter_t params;
-
-    gac_get_filter_parameter_default( &params );
-    return gar_create_filter_parameter( &params );
-}
-
-/******************************************************************************/
-SEXP gar_create_fixation_frame( gac_fixation_t* fixations, int count )
-{
-    int i;
+    uint32_t i;
     const char* names[] = { "px", "py", "pz", "duration", "timestamp", "" };
     SEXP px = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP py = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -196,9 +157,9 @@ SEXP gar_create_fixation_frame( gac_fixation_t* fixations, int count )
 }
 
 /******************************************************************************/
-SEXP gar_create_saccade_frame( gac_saccade_t* saccades, int count )
+SEXP gar_create_saccade_frame( gac_saccade_t* saccades, uint32_t count )
 {
-    int i;
+    uint32_t i;
     const char* names[] = { "startx", "starty", "startz", "destx", "desty", "destz", "duration", "timestamp", "" };
     SEXP startx = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP starty = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -245,19 +206,58 @@ SEXP gar_create_saccade_frame( gac_saccade_t* saccades, int count )
 }
 
 /******************************************************************************/
+SEXP gar_destroy( SEXP ptr )
+{
+    void* h;
+
+    CHECK_GAC_HANDLER( ptr );
+
+    h = R_ExternalPtrAddr( ptr );
+    gac_destroy( h );
+
+    return R_NilValue;
+}
+
+/******************************************************************************/
+SEXP gar_get_filter_parameter( SEXP ptr )
+{
+    void* h = R_ExternalPtrAddr( ptr );
+    gac_filter_parameter_t params;
+
+    gac_get_filter_parameter( h, &params );
+    return gar_create_filter_parameter( &params );
+}
+
+/******************************************************************************/
+SEXP gar_get_filter_parameter_default()
+{
+    gac_filter_parameter_t params;
+
+    gac_get_filter_parameter_default( &params );
+    return gar_create_filter_parameter( &params );
+}
+
+/******************************************************************************/
+SEXP gar_init( void )
+{
+    gac_type_tag = install( "GAC_TYPE_TAG" );
+    return R_NilValue;
+}
+
+/******************************************************************************/
 SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
         SEXP oy, SEXP oz, SEXP timestamp )
 {
     SEXP ret, fixations, saccades;
     const char* names[] = { "fixations", "saccades", "" };
     void* h;
-    int len, i;
+    int32_t len, i;
     double *ppx, *ppy, *ppz, *pox, *poy, *poz, *ptimestamp;
     bool res;
-    gac_fixation_t fixation[1000];
-    int fixation_count = 0;
-    gac_saccade_t saccade[1000];
-    int saccade_count = 0;
+    gac_fixation_t fixation[100000];
+    uint32_t fixation_count = 0;
+    gac_saccade_t saccade[100000];
+    uint32_t saccade_count = 0;
 
     CHECK_GAC_HANDLER( ptr );
 
