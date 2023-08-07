@@ -19,11 +19,11 @@ SEXP gar_create( SEXP r_params )
 
     gac_get_filter_parameter_default( &params );
 
-    if( Rf_isNewList( r_params ) )
+    if( TYPEOF( r_params ) == VECSXP )
     {
         // gap
         item = VECTOR_ELT( r_params, 0 );
-        if( Rf_isNewList( item ) )
+        if( TYPEOF( item ) == VECSXP )
         {
             val = VECTOR_ELT( item, 0 );
             if( Rf_isNumber( val ) )
@@ -38,7 +38,7 @@ SEXP gar_create( SEXP r_params )
         }
         // noise
         item = VECTOR_ELT( r_params, 1 );
-        if( Rf_isNewList( item ) )
+        if( TYPEOF( item ) == VECSXP )
         {
             val = VECTOR_ELT( item, 0 );
             if( Rf_isNumber( val ) )
@@ -48,7 +48,7 @@ SEXP gar_create( SEXP r_params )
         }
         // saccade
         item = VECTOR_ELT( r_params, 2 );
-        if( Rf_isNewList( item ) )
+        if( TYPEOF( item ) == VECSXP )
         {
             val = VECTOR_ELT( item, 0 );
             if( Rf_isNumber( val ) )
@@ -58,7 +58,7 @@ SEXP gar_create( SEXP r_params )
         }
         // fixation
         item = VECTOR_ELT( r_params, 3 );
-        if( Rf_isNewList( item ) )
+        if( TYPEOF( item ) == VECSXP )
         {
             val = VECTOR_ELT( item, 0 );
             if( Rf_isNumber( val ) )
