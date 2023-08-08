@@ -311,6 +311,7 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
         {
             saccade_count++;
         }
+        gac_sample_window_cleanup( h );
     }
 
     fixations = gar_create_fixation_frame( fixation, fixation_count );
