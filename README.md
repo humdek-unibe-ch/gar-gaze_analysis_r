@@ -8,10 +8,10 @@ Filters must be controlled through the filter parameter structure.
 
 ## Quick Start
 
-Install and load the library:
+Install and load the library (where `<version and os> stands for the appropriate postfix`):
 
 ```R
-install.packages("gar")
+install.packages('release/gar_<version and os>', repos = NULL)
 library(gar)
 ```
 
@@ -41,7 +41,7 @@ Load some sample data from a csv file (make sure that all data parsed as a `nume
 d <- read.csv('sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
 ```
 
-Finally, Pass the sample data to the parser
+Finally, pass the sample data to the parser
 ```R
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp )
 ```
