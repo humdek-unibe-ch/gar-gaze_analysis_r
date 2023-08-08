@@ -1,14 +1,13 @@
-# R Bindings for `libgac`
+# `gar`: R Bindings for `libgac`
 
-This repository holds an R package which implement the bindings to the gaze analysis library [gac](http://phhum-a209-cp.unibe.ch:10012/LIB/LIB-gaze_analysis_c).
-This R package is called `gar` which stands for Gaze Analysis in R.
+This repository holds an R package which implements the bindings to the gaze analysis library [gac](http://phhum-a209-cp.unibe.ch:10012/LIB/LIB-gaze_analysis_c).
 
 Note that bindings were only created for high level functions to parse for fixations and saccades.
 Filters must be controlled through the filter parameter structure.
 
 ## Quick Start
 
-Install and load the library (where `<version and os> stands for the appropriate postfix`):
+Install and load the library (where `<version and os>` stands for the appropriate file postfix depending on the library version and the target operating system):
 
 ```R
 install.packages('release/gar_<version and os>', repos = NULL)
@@ -35,7 +34,7 @@ Initialise the gaze analysis handler with the modified parameter structure (if n
 h <- gar_create( params )
 ```
 
-Load some sample data from a csv file (make sure that all data parsed as a `numeric` and not as `integer`):
+Load some sample data from a csv file (make sure that all data is parsed as a `numeric` and not as `integer`):
 
 ```R
 d <- read.csv('sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
