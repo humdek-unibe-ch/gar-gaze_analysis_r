@@ -1,6 +1,63 @@
 # R Bindings for `libgac`
 
 This repository holds an R package which implement the bindings to the gaze analysis library [gac](http://phhum-a209-cp.unibe.ch:10012/LIB/LIB-gaze_analysis_c).
+This R package is called `gar` which stands for Gaze Analysis in R.
+
+Note that bindings were only created for high level functions to parse for fixations and saccades.
+Filters must be controlled through the filter parameter structure.
+
+## Quick Start
+
+Install and load the library:
+
+```R
+install.packages("gar")
+library(gar)
+```
+
+Get the default filter parameters:
+
+```R
+params <- gar_get_filter_parameter_default()
+```
+
+Adjust the filter parameters to your liking (e.g. disable noise and gap filter and increase the velocity threshold for saccade detection ):
+
+```R
+params$gap$max_gap_length <- 0
+params$noise$mid_idx <- 0
+params$saccade$velocity_threshold <- 25
+```
+
+Initialise the gaze analysis handler with the modified parameter structure (if no parameter structure is passed to `gar_create()` the default filter parameters are used):
+
+```R
+h <- gar_create( params )
+```
+
+Load some sample data from a csv file (make sure that all data parsed as a `numeric` and not as `integer`):
+
+```R
+d <- read.csv('sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
+```
+
+Finally, Pass the sample data to the parser
+```R
+res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp )
+```
+
+The command `print(res)` should show the following output (one fixation and two saccades):
+
+```R
+$fixations
+        px       py       pz duration timestamp
+1 499.8182 499.3636 499.7273 166.6667  1083.333
+
+$saccades
+  startx starty startz destx desty destz duration timestamp
+1    300    300    500   500   500   500 33.33333      1050
+2    501    499    500   600   600   500 16.66667      1250
+```
 
 ## Create an R Package
 
