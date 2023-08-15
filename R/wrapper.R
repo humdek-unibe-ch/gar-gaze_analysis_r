@@ -1,6 +1,7 @@
-.First.lib <- function( lib, pkg )
+#' Executed on load of the library.
+.onLoad <- function( lib, pkg )
 {
-    library.dynam( "gar", pkg, lib )
+    # library.dynam( "gar", pkg, lib )
     .Call( "gar_init" )
 }
 

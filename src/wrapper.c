@@ -3,6 +3,7 @@
 
 static SEXP gac_type_tag;
 
+#define GAR_MAX_ITEMS 10000
 #define CHECK_GAC_HANDLER(h) do { \
     if( TYPEOF( h ) != EXTPTRSXP || R_ExternalPtrTag( h ) != gac_type_tag ) \
         error( "bad gac handler" ); \
@@ -86,7 +87,7 @@ SEXP gar_create( SEXP r_params )
 }
 
 /******************************************************************************/
-SEXP gar_create_filter_parameter( gac_filter_parameter_t* params )
+SEXP gar_filter_parameter_create( gac_filter_parameter_t* params )
 {
     SEXP gap, noise, saccade, fixation, list;
     const char* gap_names[] = { "max_gap_length", "sample_period", "" };
@@ -117,9 +118,8 @@ SEXP gar_create_filter_parameter( gac_filter_parameter_t* params )
 }
 
 /******************************************************************************/
-SEXP gar_create_fixation_frame( gac_fixation_t* fixations, uint32_t count )
+SEXP gar_fixation_frame_create( uint32_t count )
 {
-    uint32_t i;
     const char* names[] = { "px", "py", "pz", "duration", "timestamp", "" };
     SEXP px = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP py = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -127,15 +127,6 @@ SEXP gar_create_fixation_frame( gac_fixation_t* fixations, uint32_t count )
     SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP df;
-
-    for( i = 0; i < count; i++ )
-    {
-        REAL( px )[i] = fixations[i].point[0];
-        REAL( py )[i] = fixations[i].point[1];
-        REAL( pz )[i] = fixations[i].point[2];
-        REAL( duration )[i] = fixations[i].duration;
-        REAL( timestamp )[i] = fixations[i].timestamp;
-    }
 
     df = PROTECT( Rf_mkNamed( VECSXP, names ) );
     SET_VECTOR_ELT( df, 0, px );
@@ -150,72 +141,41 @@ SEXP gar_create_fixation_frame( gac_fixation_t* fixations, uint32_t count )
     SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
     SET_INTEGER_ELT( rownames, 1, -count );
     setAttrib( df, R_RowNamesSymbol, rownames );
-
-    UNPROTECT( 7 );
+    UNPROTECT( 1 );
 
     return df;
 }
 
 /******************************************************************************/
-SEXP gar_create_saccade_frame( gac_saccade_t* saccades, uint32_t count )
+void gar_fixation_frame_resize( SEXP df, uint32_t new_length )
 {
-    uint32_t i;
-    const char* names[] = { "startx", "starty", "startz", "destx", "desty", "destz", "duration", "timestamp", "" };
-    SEXP startx = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP starty = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP startz = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP destx = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP desty = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP destz = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP df;
-
-    for( i = 0; i < count; i++ )
-    {
-        REAL( startx )[i] = saccades[i].point_start[0];
-        REAL( starty )[i] = saccades[i].point_start[1];
-        REAL( startz )[i] = saccades[i].point_start[2];
-        REAL( destx )[i] = saccades[i].point_dest[0];
-        REAL( desty )[i] = saccades[i].point_dest[1];
-        REAL( destz )[i] = saccades[i].point_dest[2];
-        REAL( duration )[i] = saccades[i].duration;
-        REAL( timestamp )[i] = saccades[i].timestamp;
-    }
-
-    df = PROTECT( Rf_mkNamed( VECSXP, names ) );
-    SET_VECTOR_ELT( df, 0, startx );
-    SET_VECTOR_ELT( df, 1, starty );
-    SET_VECTOR_ELT( df, 2, startz );
-    SET_VECTOR_ELT( df, 3, destx );
-    SET_VECTOR_ELT( df, 4, desty );
-    SET_VECTOR_ELT( df, 5, destz );
-    SET_VECTOR_ELT( df, 6, duration );
-    SET_VECTOR_ELT( df, 7, timestamp );
-
-    SET_CLASS( df, mkString( "data.frame" ) );
+    SETLENGTH( VECTOR_ELT( df, 0 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 1 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 2 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 3 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 4 ), new_length );
 
     SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
     SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
-    SET_INTEGER_ELT( rownames, 1, -count );
+    SET_INTEGER_ELT( rownames, 1, -new_length );
     setAttrib( df, R_RowNamesSymbol, rownames );
-
-    UNPROTECT( 10 );
-
-    return df;
+    UNPROTECT( 1 );
 }
 
 /******************************************************************************/
-SEXP gar_destroy( SEXP ptr )
+void gar_fixation_frame_unprotect()
 {
-    void* h;
+    UNPROTECT( 6 );
+}
 
-    CHECK_GAC_HANDLER( ptr );
-
-    h = R_ExternalPtrAddr( ptr );
-    gac_destroy( h );
-
-    return R_NilValue;
+/******************************************************************************/
+void gar_fixation_frame_update( SEXP df, uint32_t idx, gac_fixation_t* fixation )
+{
+    REAL( VECTOR_ELT( df, 0 ) )[idx] = fixation->point[0];
+    REAL( VECTOR_ELT( df, 1 ) )[idx] = fixation->point[1];
+    REAL( VECTOR_ELT( df, 2 ) )[idx] = fixation->point[2];
+    REAL( VECTOR_ELT( df, 3 ) )[idx] = fixation->duration;
+    REAL( VECTOR_ELT( df, 4 ) )[idx] = fixation->timestamp;
 }
 
 /******************************************************************************/
@@ -225,7 +185,7 @@ SEXP gar_get_filter_parameter( SEXP ptr )
     gac_filter_parameter_t params;
 
     gac_get_filter_parameter( h, &params );
-    return gar_create_filter_parameter( &params );
+    return gar_filter_parameter_create( &params );
 }
 
 /******************************************************************************/
@@ -234,7 +194,7 @@ SEXP gar_get_filter_parameter_default()
     gac_filter_parameter_t params;
 
     gac_get_filter_parameter_default( &params );
-    return gar_create_filter_parameter( &params );
+    return gar_filter_parameter_create( &params );
 }
 
 /******************************************************************************/
@@ -254,9 +214,9 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
     int32_t len, i;
     double *ppx, *ppy, *ppz, *pox, *poy, *poz, *ptimestamp;
     bool res;
-    gac_fixation_t fixation[100000];
+    gac_fixation_t fixation;
     uint32_t fixation_count = 0;
-    gac_saccade_t saccade[100000];
+    gac_saccade_t saccade;
     uint32_t saccade_count = 0;
 
     CHECK_GAC_HANDLER( ptr );
@@ -295,32 +255,124 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
     poy = REAL( oy );
     poz = REAL( oz );
     ptimestamp = REAL( timestamp );
+    fixations = gar_fixation_frame_create( len );
+    saccades = gar_saccade_frame_create( len );
     for( i = 0; i < len; i++ )
     {
         gac_sample_window_update( h,
                 ( float )pox[i], ( float )poy[i], ( float )poz[i],
                 ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
                 ptimestamp[i] );
-        res = gac_sample_window_fixation_filter( h, &fixation[fixation_count] );
+        res = gac_sample_window_fixation_filter( h, &fixation );
         if( res )
         {
+            gar_fixation_frame_update( fixations, fixation_count, &fixation );
             fixation_count++;
         }
-        res = gac_sample_window_saccade_filter( h, &saccade[saccade_count] );
+        res = gac_sample_window_saccade_filter( h, &saccade );
         if( res )
         {
+            gar_saccade_frame_update( saccades, saccade_count, &saccade );
             saccade_count++;
         }
         gac_sample_window_cleanup( h );
     }
 
-    fixations = gar_create_fixation_frame( fixation, fixation_count );
-    saccades = gar_create_saccade_frame( saccade, saccade_count );
+    gar_fixation_frame_resize( fixations, fixation_count );
+    gar_saccade_frame_resize( saccades, saccade_count );
 
     ret = PROTECT( Rf_mkNamed( VECSXP, names ) );
     SET_VECTOR_ELT( ret, 0, fixations );
     SET_VECTOR_ELT( ret, 1, saccades );
     UNPROTECT( 1 );
 
+    gar_fixation_frame_unprotect();
+    gar_saccade_frame_unprotect();
+
     return ret;
+}
+
+/******************************************************************************/
+SEXP gar_saccade_frame_create( uint32_t count )
+{
+    const char* names[] = { "startx", "starty", "startz", "destx", "desty", "destz", "duration", "timestamp", "" };
+    SEXP startx = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP starty = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP startz = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP destx = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP desty = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP destz = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
+
+    SET_VECTOR_ELT( df, 0, startx );
+    SET_VECTOR_ELT( df, 1, starty );
+    SET_VECTOR_ELT( df, 2, startz );
+    SET_VECTOR_ELT( df, 3, destx );
+    SET_VECTOR_ELT( df, 4, desty );
+    SET_VECTOR_ELT( df, 5, destz );
+    SET_VECTOR_ELT( df, 6, duration );
+    SET_VECTOR_ELT( df, 7, timestamp );
+
+    SET_CLASS( df, mkString( "data.frame" ) );
+
+    SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
+    SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
+    SET_INTEGER_ELT( rownames, 1, -count );
+    setAttrib( df, R_RowNamesSymbol, rownames );
+    UNPROTECT( 1 );
+
+    return df;
+}
+
+/******************************************************************************/
+void gar_saccade_frame_resize( SEXP df, uint32_t new_length )
+{
+    SETLENGTH( VECTOR_ELT( df, 0 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 1 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 2 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 3 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 4 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 5 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 6 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 7 ), new_length );
+
+    SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
+    SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
+    SET_INTEGER_ELT( rownames, 1, -new_length );
+    setAttrib( df, R_RowNamesSymbol, rownames );
+    UNPROTECT( 1 );
+}
+
+/******************************************************************************/
+void gar_saccade_frame_unprotect()
+{
+    UNPROTECT( 9 );
+}
+
+/******************************************************************************/
+void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade )
+{
+    REAL( VECTOR_ELT( df, 0 ) )[idx] = saccade->point_start[0];
+    REAL( VECTOR_ELT( df, 1 ) )[idx] = saccade->point_start[1];
+    REAL( VECTOR_ELT( df, 2 ) )[idx] = saccade->point_start[2];
+    REAL( VECTOR_ELT( df, 3 ) )[idx] = saccade->point_dest[0];
+    REAL( VECTOR_ELT( df, 4 ) )[idx] = saccade->point_dest[1];
+    REAL( VECTOR_ELT( df, 5 ) )[idx] = saccade->point_dest[2];
+    REAL( VECTOR_ELT( df, 6 ) )[idx] = saccade->duration;
+    REAL( VECTOR_ELT( df, 7 ) )[idx] = saccade->timestamp;
+}
+
+/******************************************************************************/
+SEXP gar_destroy( SEXP ptr )
+{
+    void* h;
+
+    CHECK_GAC_HANDLER( ptr );
+
+    h = R_ExternalPtrAddr( ptr );
+    gac_destroy( h );
+
+    return R_NilValue;
 }

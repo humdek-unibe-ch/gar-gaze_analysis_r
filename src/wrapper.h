@@ -13,17 +13,6 @@
 SEXP gar_create( SEXP r_params );
 
 /**
- * Allocate the filter parameter R structure.
- *
- * @param params
- *  A pointer to a gac filter parameter structure holding the values to assign
- *  to the R structure.
- * @return
- *  An R named list holding the assigned gac filter parameters.
- */
-SEXP gar_create_filter_parameter( gac_filter_parameter_t* params );
-
-/**
  * Given a list of fixations, create a data frame where each row represents a
  * fixation and each column a property of all fixations.
  *
@@ -58,6 +47,54 @@ SEXP gar_create_saccade_frame( gac_saccade_t* saccades, uint32_t count );
  *  R_NilValue
  */
 SEXP gar_destroy( SEXP ptr );
+
+/**
+ * Allocate the filter parameter R structure.
+ *
+ * @param params
+ *  A pointer to a gac filter parameter structure holding the values to assign
+ *  to the R structure.
+ * @return
+ *  An R named list holding the assigned gac filter parameters.
+ */
+SEXP gar_filter_parameter_create( gac_filter_parameter_t* params );
+
+/**
+ * Create a data frame container to hold fixations.
+ *
+ * @param count
+ *  A preliminary count of items to be added to the data frame.
+ * @return
+ *  The data frame.
+ */
+SEXP gar_fixation_frame_create( uint32_t count );
+
+/**
+ * Resize the fixation data frame.
+ *
+ * @param df
+ *  The data frame to rezise.
+ * @param new_length
+ *  The ne length of the data frame
+ */
+void gar_fixation_frame_resize( SEXP df, uint32_t new_length );
+
+/**
+ * Release the protection of the fixation data frame.
+ */
+void gar_fixation_frame_unprotect();
+
+/**
+ * Add a new entry to the fixation data frame.
+ *
+ * @param df
+ *  The data frame to update.
+ * @param idx
+ *  The row index of the new entry.
+ * @param fixation
+ *  The fixation entry to add.
+ */
+void gar_fixation_frame_update( SEXP df, uint32_t idx, gac_fixation_t* fixation );
 
 /**
  * Return the current parameter of the gac handler.
@@ -113,3 +150,40 @@ SEXP gar_init( void );
  */
 SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
         SEXP oy, SEXP oz, SEXP timestamp );
+
+/**
+ * Create a data frame container to hold saccades.
+ *
+ * @param count
+ *  A preliminary count of items to be added to the data frame.
+ * @return
+ *  The data frame.
+ */
+SEXP gar_saccade_frame_create( uint32_t count );
+
+/**
+ * Resize the saccade data frame.
+ *
+ * @param df
+ *  The data frame to rezise.
+ * @param new_length
+ *  The ne length of the data frame
+ */
+void gar_saccade_frame_resize( SEXP df, uint32_t new_length );
+
+/**
+ * Release the protection of the saccade data frame.
+ */
+void gar_saccade_frame_unprotect();
+
+/**
+ * Add a new entry to the saccade data frame.
+ *
+ * @param df
+ *  The data frame to update.
+ * @param idx
+ *  The row index of the new entry.
+ * @param saccade
+ *  The saccade entry to add.
+ */
+void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade );
