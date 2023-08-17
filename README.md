@@ -37,25 +37,25 @@ h <- gar_create( params )
 Load some sample data from a csv file (make sure that all data is parsed as a `numeric` and not as `integer`):
 
 ```R
-d <- read.csv('sample/test.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
+d <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character'))
 ```
 
 Finally, pass the sample data to the parser
 ```R
-res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp )
+res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 ```
 
 The command `print(res)` should show the following output (one fixation and two saccades):
 
 ```R
 $fixations
-        px       py       pz duration timestamp
-1 499.8182 499.3636 499.7273 166.6667  1083.333
+  sx sy       px       py       pz duration timestamp trial_id  label
+1  0  0 499.8182 499.3636 499.7273 166.6667  1083.333        0 static
 
 $saccades
-  startx starty startz destx desty destz duration timestamp
-1    300    300    500   500   500   500 33.33333      1050
-2    501    499    500   600   600   500 16.66667      1250
+  start_screen_x start_screen_y start_x start_y start_z dest_screen_x dest_screen_y dest_x dest_y dest_z duration timestamp trial_id  label
+1              0              0     300     300     500             0             0    500    500    500 33.33333      1050        0 static
+2              0              0     501     499     500             0             0    600    600    500 16.66667      1250        0 static
 ```
 
 ## Create an R Package
