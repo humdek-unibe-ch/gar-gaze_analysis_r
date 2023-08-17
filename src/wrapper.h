@@ -131,25 +131,33 @@ SEXP gar_init( void );
  * @param ptr
  *  An external pointer structure pointing to the gac handler.
  * @param px
- *  A vector holding the x coordinate of the gaze position.
+ *  A vector holding the x coordinates of the gaze point.
  * @param py
- *  A vector holding the y coordinate of the gaze position.
+ *  A vector holding the y coordinates of the gaze point.
  * @param pz
- *  A vector holding the z coordinate of the gaze position.
+ *  A vector holding the z coordinates of the gaze point.
  * @param ox
- *  A vector holding the x coordinate of the gaze origin.
+ *  A vector holding the x coordinates of the gaze origin.
  * @param oy
- *  A vector holding the z coordinate of the gaze origin.
+ *  A vector holding the y coordinates of the gaze origin.
  * @param oy
- *  A vector holding the z coordinate of the gaze origin.
+ *  A vector holding the z coordinates of the gaze origin.
+ * @param sx
+ *  A vector holding the x coordinates of the gaze screen point.
+ * @param sy
+ *  A vector holding the y coordinates of the gaze screen point.
  * @param timestamp
  *  A vector holding the relative timestamps of the samples.
+ * @param trial_id
+ *  The ID of the current trial.
+ * @param label
+ *  An arbitary label annotating the data.
  * @return
  *  A named list holding two data frames, one holding fixations and one holding
  *  saccades.
  */
-SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox,
-        SEXP oy, SEXP oz, SEXP timestamp );
+SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
+        SEXP sx, SEXP sy, SEXP timestamp, SEXP trial_id, SEXP label );
 
 /**
  * Create a data frame container to hold saccades.

@@ -4,7 +4,7 @@
 \alias{gar_parse}
 \title{Parse a set of input data for fixations and saccades.}
 \usage{
-gar_parse(h, px, py, pz, ox, oy, oz, timestamp)
+gar_parse(h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label)
 }
 \arguments{
 \item{h}{A pointer to the gaze analysis handler, holding the filter parameters.}
@@ -21,17 +21,29 @@ gar_parse(h, px, py, pz, ox, oy, oz, timestamp)
 
 \item{oz}{A double vector of z cooridnates of the gaze origin}
 
+\item{sx}{A vector holding the x coordinates of the gaze screen point}
+
+\item{sy}{A vector holding the y coordinates of the gaze screen point}
+
 \item{timestamp}{A double vector of the relative timestamp in milliseconds}
+
+\item{trial_id}{The ID of the ongoing trial}
+
+\item{label}{An arbitrary label annotating the sample}
 }
 \value{
 The identified fixations and saccades as a named list:
  - fixations[]:
+   - sx: The x-coordinate of the average screen gaze point during the fixation
+   - sy: The y-coordinate of the average screen gaze point during the fixation
    - px: The x-coordinate of the average gaze point during the fixation
    - py: The y-coordinate of the average gaze point during the fixation
    - pz: The z-coordinate of the average gaze point during the fixation
    - duration: The fixation duration in milliseconds
    - timestamp: The relative timestamp of the first gaze point in the
      fixation in milliseconds
+   - trial_id: The rial ID of first sample of the fixation
+   - label: The annotation of the first sample of the fixation
  - saccades[]:
    - startx: The x-coordinate of the first gaze point in the saccade
    - starty: The y-coordinate of the first gaze point in the saccade
@@ -48,6 +60,6 @@ Parse a set of input data for fixations and saccades.
 }
 \examples{
  h <- gar_create()
- d <- read.csv( 'sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric') )
- res <- gar_filter( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp )
+ d <- read.csv( 'sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'string') )
+ res <- gar_filter( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 }

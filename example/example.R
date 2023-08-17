@@ -13,5 +13,5 @@ h <- gar_create( params )
 new_params <- gar_get_filter_parameter( h )
 print(new_params)
 
-d <- read.csv('example/sample2.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric'))
-res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$timestamp)
+d <- read.csv('example/sample2.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character'))
+res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
