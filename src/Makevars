@@ -12,8 +12,11 @@ PKG_LIBS=-L"$(CGLM)/.libs" "$(GAC)/build/lib/libgac.a" -lcglm -lm
 
 .PHONY: all $(GACLIB)
 
-all: $(SHLIB)
+all: clean $(SHLIB)
 $(SHLIB): $(GACLIB)
 
 $(GACLIB):
 	(cd $(GAC); $(MAKE))
+
+clean:
+	(cd $(GAC); $(MAKE) clean)
