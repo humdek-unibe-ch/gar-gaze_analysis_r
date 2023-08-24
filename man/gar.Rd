@@ -6,8 +6,10 @@
 \title{gar: R bindings for the gaze analysis C library libgac.}
 \description{
 The library allow to perform basic gaze analysis.
-- Sample filtering with moving average
-- Sample gap fill-in through linear interpolation (lerp)
-- Fixation detection with I-DT algorithm
-- Saccade detection with I-VT algorithm
+\itemize{
+\item Sample filtering with moving average
+\item Sample gap fill-in through linear interpolation (lerp)
+\item Fixation detection with I-DT algorithm
+\item Saccade detection with I-VT algorithm
+}
 }

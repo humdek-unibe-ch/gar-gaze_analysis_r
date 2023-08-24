@@ -33,27 +33,33 @@ gar_parse(h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label)
 }
 \value{
 The identified fixations and saccades as a named list:
- - fixations[]:
-   - sx: The x-coordinate of the average screen gaze point during the fixation
-   - sy: The y-coordinate of the average screen gaze point during the fixation
-   - px: The x-coordinate of the average gaze point during the fixation
-   - py: The y-coordinate of the average gaze point during the fixation
-   - pz: The z-coordinate of the average gaze point during the fixation
-   - duration: The fixation duration in milliseconds
-   - timestamp: The relative timestamp of the first gaze point in the
-     fixation in milliseconds
-   - trial_id: The rial ID of first sample of the fixation
-   - label: The annotation of the first sample of the fixation
- - saccades[]:
-   - startx: The x-coordinate of the first gaze point in the saccade
-   - starty: The y-coordinate of the first gaze point in the saccade
-   - startz: The z-coordinate of the first gaze point in the saccade
-   - destx: The x-coordinate of the last gaze point in the saccade
-   - desty: The y-coordinate of the last gaze point in the saccade
-   - destz: The z-coordinate of the last gaze point in the saccade
-   - duration: The saccade duration in milliseconds
-   - timestamp: The relative timestamp of the first gaze point in the
-     saccade in milliseconds
+\itemize{
+\item fixations[]:
+\itemize{
+\item sx: The x-coordinate of the average screen gaze point during the fixation
+\item sy: The y-coordinate of the average screen gaze point during the fixation
+\item px: The x-coordinate of the average gaze point during the fixation
+\item py: The y-coordinate of the average gaze point during the fixation
+\item pz: The z-coordinate of the average gaze point during the fixation
+\item duration: The fixation duration in milliseconds
+\item timestamp: The relative timestamp of the first gaze point in the
+fixation in milliseconds
+\item trial_id: The rial ID of first sample of the fixation
+\item label: The annotation of the first sample of the fixation
+}
+\item saccades[]:
+\itemize{
+\item startx: The x-coordinate of the first gaze point in the saccade
+\item starty: The y-coordinate of the first gaze point in the saccade
+\item startz: The z-coordinate of the first gaze point in the saccade
+\item destx: The x-coordinate of the last gaze point in the saccade
+\item desty: The y-coordinate of the last gaze point in the saccade
+\item destz: The z-coordinate of the last gaze point in the saccade
+\item duration: The saccade duration in milliseconds
+\item timestamp: The relative timestamp of the first gaze point in the
+saccade in milliseconds
+}
+}
 }
 \description{
 Parse a set of input data for fixations and saccades.
