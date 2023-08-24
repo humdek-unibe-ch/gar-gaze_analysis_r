@@ -121,8 +121,46 @@ gar_get_filter_parameter_default <- function()
 #' @examples
 #'  h <- gar_create()
 #'  d <- read.csv( 'sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'string') )
-#'  res <- gar_filter( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
+#'  res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 gar_parse <- function( h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label )
 {
     return( .Call( "gar_parse", h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label ) )
+}
+
+#' Configure the screen position in 3d space. This allows to compute 2d
+#' gaze point coordinates.
+#'
+#' @param h
+#'  A pointer to the gaze analysis handler.
+#' @param top_left_x
+#'  The x coordinate of the top left screen corner.
+#' @param top_left_y
+#'  The y coordinate of the top left screen corner.
+#' @param top_left_z
+#'  The z coordinate of the top left screen corner.
+#' @param top_right_x
+#'  The x coordinate of the top right screen corner.
+#' @param top_right_y
+#'  The y coordinate of the top right screen corner.
+#' @param top_right_z
+#'  The z coordinate of the top right screen corner.
+#' @param bottom_left_x
+#'  The x coordinate of the bottom left screen corner.
+#' @param bottom_left_y
+#'  The y coordinate of the bottom left screen corner.
+#' @param bottom_left_z
+#'  The z coordinate of the bottom left screen corner.
+#' @export
+#' @examples
+#'  h <- gar_create()
+#'  gar_set_screen( h, -298.64, 331.74, 113.91, 298.88, 331.74, 113.91, -298.64, 15.91, -1.05 )
+gar_set_screen <- function( h,
+        top_left_x, top_left_y, top_left_z,
+        top_right_x, top_right_y, top_right_z,
+        bottom_left_x, bottom_left_y, bottom_left_z )
+{
+    return( .Call( "gar_set_screen", h,
+          top_left_x, top_left_y, top_left_z,
+          top_right_x, top_right_y, top_right_z,
+          bottom_left_x, bottom_left_y, bottom_left_z ) )
 }

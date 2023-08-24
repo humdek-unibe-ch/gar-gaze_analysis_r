@@ -120,7 +120,7 @@ SEXP gar_filter_parameter_create( gac_filter_parameter_t* params )
 /******************************************************************************/
 SEXP gar_fixation_frame_create( uint32_t count )
 {
-    const char* names[] = { "sx", "sy", "px", "py", "pz", "duration", "timestamp", "trial_id", "label", "" };
+    const char* names[] = { "sx", "sy", "px", "py", "pz", "duration", "timestamp", "trial_id", "trial_onset", "label", "label_onset", "" };
     SEXP sx = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP sy = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP px = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -128,6 +128,8 @@ SEXP gar_fixation_frame_create( uint32_t count )
     SEXP pz = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP trial_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP trial_id = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
     SEXP df;
@@ -141,7 +143,9 @@ SEXP gar_fixation_frame_create( uint32_t count )
     SET_VECTOR_ELT( df, 5, duration );
     SET_VECTOR_ELT( df, 6, timestamp );
     SET_VECTOR_ELT( df, 7, trial_id );
-    SET_VECTOR_ELT( df, 8, label );
+    SET_VECTOR_ELT( df, 8, trial_onset );
+    SET_VECTOR_ELT( df, 9, label );
+    SET_VECTOR_ELT( df, 10, label_onset );
 
     SET_CLASS( df, mkString( "data.frame" ) );
 
@@ -166,6 +170,8 @@ void gar_fixation_frame_resize( SEXP df, uint32_t new_length )
     SETLENGTH( VECTOR_ELT( df, 6 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 7 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 8 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 9 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 10 ), new_length );
 
     SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
     SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
@@ -177,7 +183,7 @@ void gar_fixation_frame_resize( SEXP df, uint32_t new_length )
 /******************************************************************************/
 void gar_fixation_frame_unprotect()
 {
-    UNPROTECT( 10 );
+    UNPROTECT( 12 );
 }
 
 /******************************************************************************/
@@ -191,11 +197,13 @@ void gar_fixation_frame_update( SEXP df, uint32_t idx, gac_fixation_t* fixation 
     REAL( VECTOR_ELT( df, 3 ) )[idx] = fixation->point[1];
     REAL( VECTOR_ELT( df, 4 ) )[idx] = fixation->point[2];
     REAL( VECTOR_ELT( df, 5 ) )[idx] = fixation->duration;
-    REAL( VECTOR_ELT( df, 6 ) )[idx] = fixation->first_sample->timestamp;
-    REAL( VECTOR_ELT( df, 7 ) )[idx] = fixation->first_sample->trial_id;
-    label = PROTECT( Rf_mkChar( fixation->first_sample->label ) );
-    SET_STRING_ELT( VECTOR_ELT( df, 8 ), idx, label );
+    REAL( VECTOR_ELT( df, 6 ) )[idx] = fixation->first_sample.timestamp;
+    REAL( VECTOR_ELT( df, 7 ) )[idx] = fixation->first_sample.trial_id;
+    REAL( VECTOR_ELT( df, 8 ) )[idx] = fixation->first_sample.trial_onset;
+    label = PROTECT( Rf_mkChar( fixation->first_sample.label ) );
+    SET_STRING_ELT( VECTOR_ELT( df, 9 ), idx, label );
     UNPROTECT( 1 );
+    REAL( VECTOR_ELT( df, 10 ) )[idx] = fixation->first_sample.label_onset;
 }
 
 /******************************************************************************/
@@ -245,8 +253,8 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     if( !Rf_isReal( px )
         || !Rf_isReal( py )
         || !Rf_isReal( pz )
-        || !Rf_isReal( sx )
-        || !Rf_isReal( sy )
+        || ( sx != R_NilValue && !Rf_isReal( sx ) )
+        || ( sy != R_NilValue && !Rf_isReal( sy ) )
         || !Rf_isReal( ox )
         || !Rf_isReal( oy )
         || !Rf_isReal( oz )
@@ -273,8 +281,8 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     if( Rf_length( px ) != len
         || Rf_length( py ) != len
         || Rf_length( pz ) != len
-        || Rf_length( sx ) != len
-        || Rf_length( sy ) != len
+        || ( sx != R_NilValue && Rf_length( sx ) != len )
+        || ( sx != R_NilValue && Rf_length( sy ) != len )
         || Rf_length( ox ) != len
         || Rf_length( oy ) != len
         || Rf_length( oz ) != len
@@ -287,8 +295,16 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
 
     h = R_ExternalPtrAddr( ptr );
 
-    psx = REAL( sx );
-    psy = REAL( sy );
+    psx = NULL;
+    if( sx != R_NilValue )
+    {
+        psx = REAL( sx );
+    }
+    psy = NULL;
+    if( sy != R_NilValue )
+    {
+        psy = REAL( sy );
+    }
     ppx = REAL( px );
     ppy = REAL( py );
     ppz = REAL( pz );
@@ -302,11 +318,21 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     for( i = 0; i < len; i++ )
     {
         rlabel = STRING_ELT( label, i );
-        gac_sample_window_update_screen( h,
-                ( float )pox[i], ( float )poy[i], ( float )poz[i],
-                ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
-                ( float )psx[i], ( float )psy[i],
-                ptimestamp[i], ptrial_id[i], R_CHAR( rlabel ) );
+        if( psx != NULL && psy != NULL )
+        {
+            gac_sample_window_update_screen( h,
+                    ( float )pox[i], ( float )poy[i], ( float )poz[i],
+                    ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
+                    ( float )psx[i], ( float )psy[i],
+                    ptimestamp[i], ptrial_id[i], R_CHAR( rlabel ) );
+        }
+        else
+        {
+            gac_sample_window_update( h,
+                    ( float )pox[i], ( float )poy[i], ( float )poz[i],
+                    ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
+                    ptimestamp[i], ptrial_id[i], R_CHAR( rlabel ) );
+        }
         res = gac_sample_window_fixation_filter( h, &fixation );
         if( res )
         {
@@ -339,9 +365,25 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
 }
 
 /******************************************************************************/
+SEXP gar_set_screen( SEXP ptr,
+        SEXP top_left_x, SEXP top_left_y, SEXP top_left_z,
+        SEXP top_right_x, SEXP top_right_y, SEXP top_right_z,
+        SEXP bottom_left_x, SEXP bottom_left_y, SEXP bottom_left_z )
+{
+    void* h = R_ExternalPtrAddr( ptr );
+
+    gac_set_screen( h,
+            Rf_asReal( top_left_x ), Rf_asReal( top_left_y ), Rf_asReal( top_left_z ),
+            Rf_asReal( top_right_x ), Rf_asReal( top_right_y ), Rf_asReal( top_right_z ),
+            Rf_asReal( bottom_left_x ), Rf_asReal( bottom_left_y ), Rf_asReal( bottom_left_z ) );
+
+    return R_NilValue;
+}
+
+/******************************************************************************/
 SEXP gar_saccade_frame_create( uint32_t count )
 {
-    const char* names[] = { "start_screen_x", "start_screen_y", "start_x", "start_y", "start_z", "dest_screen_x", "dest_screen_y", "dest_x", "dest_y", "dest_z", "duration", "timestamp", "trial_id", "label", "" };
+    const char* names[] = { "start_screen_x", "start_screen_y", "start_x", "start_y", "start_z", "dest_screen_x", "dest_screen_y", "dest_x", "dest_y", "dest_z", "duration", "timestamp", "trial_id", "trial_onset", "label", "label_onset", "" };
     SEXP startscreenx = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP startscreeny = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP startx = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -355,7 +397,9 @@ SEXP gar_saccade_frame_create( uint32_t count )
     SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP trial_id = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP trial_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
+    SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
 
     SET_VECTOR_ELT( df, 0, startscreenx );
@@ -371,7 +415,9 @@ SEXP gar_saccade_frame_create( uint32_t count )
     SET_VECTOR_ELT( df, 10, duration );
     SET_VECTOR_ELT( df, 11, timestamp );
     SET_VECTOR_ELT( df, 12, trial_id );
-    SET_VECTOR_ELT( df, 13, label );
+    SET_VECTOR_ELT( df, 13, trial_onset );
+    SET_VECTOR_ELT( df, 14, label );
+    SET_VECTOR_ELT( df, 15, label_onset );
 
     SET_CLASS( df, mkString( "data.frame" ) );
 
@@ -401,6 +447,8 @@ void gar_saccade_frame_resize( SEXP df, uint32_t new_length )
     SETLENGTH( VECTOR_ELT( df, 11 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 12 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 13 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 14 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 15 ), new_length );
 
     SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
     SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
@@ -412,7 +460,7 @@ void gar_saccade_frame_resize( SEXP df, uint32_t new_length )
 /******************************************************************************/
 void gar_saccade_frame_unprotect()
 {
-    UNPROTECT( 15 );
+    UNPROTECT( 17 );
 }
 
 /******************************************************************************/
@@ -420,22 +468,24 @@ void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade )
 {
     SEXP label;
 
-    REAL( VECTOR_ELT( df, 0 ) )[idx] = saccade->first_sample->screen_point[0];
-    REAL( VECTOR_ELT( df, 1 ) )[idx] = saccade->first_sample->screen_point[1];
-    REAL( VECTOR_ELT( df, 2 ) )[idx] = saccade->first_sample->point[0];
-    REAL( VECTOR_ELT( df, 3 ) )[idx] = saccade->first_sample->point[1];
-    REAL( VECTOR_ELT( df, 4 ) )[idx] = saccade->first_sample->point[2];
-    REAL( VECTOR_ELT( df, 5 ) )[idx] = saccade->last_sample->screen_point[0];
-    REAL( VECTOR_ELT( df, 6 ) )[idx] = saccade->last_sample->screen_point[1];
-    REAL( VECTOR_ELT( df, 7 ) )[idx] = saccade->last_sample->point[0];
-    REAL( VECTOR_ELT( df, 8 ) )[idx] = saccade->last_sample->point[1];
-    REAL( VECTOR_ELT( df, 9 ) )[idx] = saccade->last_sample->point[2];
-    REAL( VECTOR_ELT( df, 10 ) )[idx] = saccade->last_sample->timestamp - saccade->first_sample->timestamp;
-    REAL( VECTOR_ELT( df, 11 ) )[idx] = saccade->first_sample->timestamp;
-    REAL( VECTOR_ELT( df, 12 ) )[idx] = saccade->first_sample->trial_id;
-    label = PROTECT( Rf_mkChar( saccade->first_sample->label ) );
-    SET_STRING_ELT( VECTOR_ELT( df, 13 ), idx, label );
+    REAL( VECTOR_ELT( df, 0 ) )[idx] = saccade->first_sample.screen_point[0];
+    REAL( VECTOR_ELT( df, 1 ) )[idx] = saccade->first_sample.screen_point[1];
+    REAL( VECTOR_ELT( df, 2 ) )[idx] = saccade->first_sample.point[0];
+    REAL( VECTOR_ELT( df, 3 ) )[idx] = saccade->first_sample.point[1];
+    REAL( VECTOR_ELT( df, 4 ) )[idx] = saccade->first_sample.point[2];
+    REAL( VECTOR_ELT( df, 5 ) )[idx] = saccade->last_sample.screen_point[0];
+    REAL( VECTOR_ELT( df, 6 ) )[idx] = saccade->last_sample.screen_point[1];
+    REAL( VECTOR_ELT( df, 7 ) )[idx] = saccade->last_sample.point[0];
+    REAL( VECTOR_ELT( df, 8 ) )[idx] = saccade->last_sample.point[1];
+    REAL( VECTOR_ELT( df, 9 ) )[idx] = saccade->last_sample.point[2];
+    REAL( VECTOR_ELT( df, 10 ) )[idx] = saccade->last_sample.timestamp - saccade->first_sample.timestamp;
+    REAL( VECTOR_ELT( df, 11 ) )[idx] = saccade->first_sample.timestamp;
+    REAL( VECTOR_ELT( df, 12 ) )[idx] = saccade->first_sample.trial_id;
+    REAL( VECTOR_ELT( df, 13 ) )[idx] = saccade->first_sample.trial_onset;
+    label = PROTECT( Rf_mkChar( saccade->first_sample.label ) );
+    SET_STRING_ELT( VECTOR_ELT( df, 14 ), idx, label );
     UNPROTECT( 1 );
+    REAL( VECTOR_ELT( df, 15 ) )[idx] = saccade->first_sample.label_onset;
 }
 
 /******************************************************************************/

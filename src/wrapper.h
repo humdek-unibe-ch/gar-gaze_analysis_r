@@ -160,6 +160,38 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
         SEXP sx, SEXP sy, SEXP timestamp, SEXP trial_id, SEXP label );
 
 /**
+ * Configure the screen position in 3d space. This allows to compute 2d
+ * gaze point coordinates.
+ *
+ * @param h
+ *  A pointer to the gaze analysis handler.
+ * @param top_left_x
+ *  The x coordinate of the top left screen corner.
+ * @param top_left_y
+ *  The y coordinate of the top left screen corner.
+ * @param top_left_z
+ *  The z coordinate of the top left screen corner.
+ * @param top_right_x
+ *  The x coordinate of the top right screen corner.
+ * @param top_right_y
+ *  The y coordinate of the top right screen corner.
+ * @param top_right_z
+ *  The z coordinate of the top right screen corner.
+ * @param bottom_left_x
+ *  The x coordinate of the bottom left screen corner.
+ * @param bottom_left_y
+ *  The y coordinate of the bottom left screen corner.
+ * @param bottom_left_z
+ *  The z coordinate of the bottom left screen corner.
+ * @return
+ *  R_NilValue
+ */
+SEXP gar_set_screen( SEXP ptr,
+        SEXP top_left_x, SEXP top_left_y, SEXP top_left_z,
+        SEXP top_right_x, SEXP top_right_y, SEXP top_right_z,
+        SEXP bottom_left_x, SEXP bottom_left_y, SEXP bottom_left_z );
+
+/**
  * Create a data frame container to hold saccades.
  *
  * @param count

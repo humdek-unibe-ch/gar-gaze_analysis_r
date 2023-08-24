@@ -10,8 +10,16 @@ params$saccade$velocity_threshold <- 25
 params$fixation$duration_threshold <- 120
 params$fixation$dispersion_threshold <- 1.5
 h <- gar_create( params )
+h_screen <- gar_create( params )
+gar_set_screen( h_screen,
+                -298.64031982421875, 331.7396545410156, 113.90633392333984,
+                298.87738037109375, 331.7396545410156, 113.90633392333984,
+                -298.64031982421875, 15.905486106872559, -1.0478993654251099 )
+
 new_params <- gar_get_filter_parameter( h )
 print(new_params)
 
-d <- read.csv('example/sample2.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character'))
+d_raw <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character', 'logical', 'logical', 'logical'))
+d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
+res_screen <- gar_parse( h_screen, d$px, d$py, d$pz, d$ox, d$oy, d$oz, NULL, NULL, d$timestamp, d$trial_id, d$label )
