@@ -81,8 +81,11 @@ void gar_fixation_frame_resize( SEXP df, uint32_t new_length );
 
 /**
  * Release the protection of the fixation data frame.
+ *
+ * @param df
+ *  The data frame to unprotect.
  */
-void gar_fixation_frame_unprotect();
+void gar_fixation_frame_unprotect( SEXP df );
 
 /**
  * Add a new entry to the fixation data frame.
@@ -213,8 +216,11 @@ void gar_saccade_frame_resize( SEXP df, uint32_t new_length );
 
 /**
  * Release the protection of the saccade data frame.
+ *
+ * @param df
+ *  The data frame to unprotect.
  */
-void gar_saccade_frame_unprotect();
+void gar_saccade_frame_unprotect( SEXP df );
 
 /**
  * Add a new entry to the saccade data frame.

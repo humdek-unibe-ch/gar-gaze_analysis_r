@@ -121,6 +121,8 @@ SEXP gar_filter_parameter_create( gac_filter_parameter_t* params )
 SEXP gar_fixation_frame_create( uint32_t count )
 {
     const char* names[] = { "sx", "sy", "px", "py", "pz", "duration", "timestamp", "trial_id", "trial_onset", "label", "label_onset", "" };
+    SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
+
     SEXP sx = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP sy = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP px = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -132,9 +134,7 @@ SEXP gar_fixation_frame_create( uint32_t count )
     SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP trial_id = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
-    SEXP df;
 
-    df = PROTECT( Rf_mkNamed( VECSXP, names ) );
     SET_VECTOR_ELT( df, 0, sx );
     SET_VECTOR_ELT( df, 1, sy );
     SET_VECTOR_ELT( df, 2, px );
@@ -146,6 +146,7 @@ SEXP gar_fixation_frame_create( uint32_t count )
     SET_VECTOR_ELT( df, 8, trial_onset );
     SET_VECTOR_ELT( df, 9, label );
     SET_VECTOR_ELT( df, 10, label_onset );
+    UNPROTECT( 11 );
 
     SET_CLASS( df, mkString( "data.frame" ) );
 
@@ -181,15 +182,20 @@ void gar_fixation_frame_resize( SEXP df, uint32_t new_length )
 }
 
 /******************************************************************************/
-void gar_fixation_frame_unprotect()
+void gar_fixation_frame_unprotect( SEXP df )
 {
-    UNPROTECT( 12 );
+    UNPROTECT_PTR( df );
 }
 
 /******************************************************************************/
 void gar_fixation_frame_update( SEXP df, uint32_t idx, gac_fixation_t* fixation )
 {
-    SEXP label;
+    const char* label = "";
+
+    if( fixation->first_sample.label != NULL )
+    {
+        label = fixation->first_sample.label;
+    }
 
     REAL( VECTOR_ELT( df, 0 ) )[idx] = fixation->screen_point[0];
     REAL( VECTOR_ELT( df, 1 ) )[idx] = fixation->screen_point[1];
@@ -200,9 +206,7 @@ void gar_fixation_frame_update( SEXP df, uint32_t idx, gac_fixation_t* fixation 
     REAL( VECTOR_ELT( df, 6 ) )[idx] = fixation->first_sample.timestamp;
     REAL( VECTOR_ELT( df, 7 ) )[idx] = fixation->first_sample.trial_id;
     REAL( VECTOR_ELT( df, 8 ) )[idx] = fixation->first_sample.trial_onset;
-    label = PROTECT( Rf_mkChar( fixation->first_sample.label ) );
-    SET_STRING_ELT( VECTOR_ELT( df, 9 ), idx, label );
-    UNPROTECT( 1 );
+    SET_STRING_ELT( VECTOR_ELT( df, 9 ), idx, Rf_mkChar( label ) );
     REAL( VECTOR_ELT( df, 10 ) )[idx] = fixation->first_sample.label_onset;
 }
 
@@ -237,6 +241,7 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
         SEXP sx, SEXP sy, SEXP timestamp, SEXP trial_id, SEXP label )
 {
     SEXP ret, fixations, saccades, rlabel;
+    const char* clabel;
     const char* names[] = { "fixations", "saccades", "" };
     void* h;
     int32_t len, i;
@@ -318,20 +323,25 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     for( i = 0; i < len; i++ )
     {
         rlabel = STRING_ELT( label, i );
+        clabel = NULL;
+        if( !Rf_StringBlank( rlabel ) )
+        {
+            clabel = CHAR( rlabel );
+        }
         if( psx != NULL && psy != NULL )
         {
             gac_sample_window_update_screen( h,
                     ( float )pox[i], ( float )poy[i], ( float )poz[i],
                     ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
                     ( float )psx[i], ( float )psy[i],
-                    ptimestamp[i], ptrial_id[i], R_CHAR( rlabel ) );
+                    ptimestamp[i], ptrial_id[i], clabel );
         }
         else
         {
             gac_sample_window_update( h,
                     ( float )pox[i], ( float )poy[i], ( float )poz[i],
                     ( float )ppx[i], ( float )ppy[i], ( float )ppz[i],
-                    ptimestamp[i], ptrial_id[i], R_CHAR( rlabel ) );
+                    ptimestamp[i], ptrial_id[i], clabel );
         }
         res = gac_sample_window_fixation_filter( h, &fixation );
         if( res )
@@ -358,8 +368,8 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     SET_VECTOR_ELT( ret, 1, saccades );
     UNPROTECT( 1 );
 
-    gar_fixation_frame_unprotect();
-    gar_saccade_frame_unprotect();
+    gar_fixation_frame_unprotect( fixations );
+    gar_saccade_frame_unprotect( saccades );
 
     return ret;
 }
@@ -384,6 +394,7 @@ SEXP gar_set_screen( SEXP ptr,
 SEXP gar_saccade_frame_create( uint32_t count )
 {
     const char* names[] = { "start_screen_x", "start_screen_y", "start_x", "start_y", "start_z", "dest_screen_x", "dest_screen_y", "dest_x", "dest_y", "dest_z", "duration", "timestamp", "trial_id", "trial_onset", "label", "label_onset", "" };
+    SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
     SEXP startscreenx = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP startscreeny = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP startx = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -400,7 +411,6 @@ SEXP gar_saccade_frame_create( uint32_t count )
     SEXP trial_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
     SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
 
     SET_VECTOR_ELT( df, 0, startscreenx );
     SET_VECTOR_ELT( df, 1, startscreeny );
@@ -418,6 +428,8 @@ SEXP gar_saccade_frame_create( uint32_t count )
     SET_VECTOR_ELT( df, 13, trial_onset );
     SET_VECTOR_ELT( df, 14, label );
     SET_VECTOR_ELT( df, 15, label_onset );
+
+    UNPROTECT( 16 );
 
     SET_CLASS( df, mkString( "data.frame" ) );
 
@@ -458,15 +470,20 @@ void gar_saccade_frame_resize( SEXP df, uint32_t new_length )
 }
 
 /******************************************************************************/
-void gar_saccade_frame_unprotect()
+void gar_saccade_frame_unprotect( SEXP df )
 {
-    UNPROTECT( 17 );
+    UNPROTECT_PTR( df );
 }
 
 /******************************************************************************/
 void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade )
 {
-    SEXP label;
+    const char* label = "";
+
+    if( saccade->first_sample.label != NULL )
+    {
+        label = saccade->first_sample.label;
+    }
 
     REAL( VECTOR_ELT( df, 0 ) )[idx] = saccade->first_sample.screen_point[0];
     REAL( VECTOR_ELT( df, 1 ) )[idx] = saccade->first_sample.screen_point[1];
@@ -482,9 +499,7 @@ void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade )
     REAL( VECTOR_ELT( df, 11 ) )[idx] = saccade->first_sample.timestamp;
     REAL( VECTOR_ELT( df, 12 ) )[idx] = saccade->first_sample.trial_id;
     REAL( VECTOR_ELT( df, 13 ) )[idx] = saccade->first_sample.trial_onset;
-    label = PROTECT( Rf_mkChar( saccade->first_sample.label ) );
-    SET_STRING_ELT( VECTOR_ELT( df, 14 ), idx, label );
-    UNPROTECT( 1 );
+    SET_STRING_ELT( VECTOR_ELT( df, 14 ), idx, Rf_mkChar( label ) );
     REAL( VECTOR_ELT( df, 15 ) )[idx] = saccade->first_sample.label_onset;
 }
 
