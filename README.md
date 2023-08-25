@@ -3,7 +3,7 @@
 This repository holds an R package which implements the bindings to the gaze analysis library [gac](http://phhum-a209-cp.unibe.ch:10012/LIB/LIB-gaze_analysis_c).
 
 Note that bindings were only created for high level functions to parse for fixations and saccades.
-Filters must be controlled through the filter parameter structure.
+Filters can be controlled through the filter parameter structure.
 
 ## Quick Start
 
@@ -14,7 +14,7 @@ install.packages('release/gar_<version and os>', repos = NULL)
 library(gar)
 ```
 
-Get the default filter parameters:
+Get the default filter parameters (use `help(gar_get_filter_parameter_default)` for a parameter documentation):
 
 ```R
 params <- gar_get_filter_parameter_default()
@@ -34,29 +34,76 @@ Initialise the gaze analysis handler with the modified parameter structure (if n
 h <- gar_create( params )
 ```
 
-Load some sample data from a csv file (make sure that all data is parsed as a `numeric` and not as `integer`):
+Load some sample data from a csv file (make sure that coordinate and timestamp data is parsed as a `numeric` and not as `integer`) and filter the data for valid gaze samples:
 
 ```R
-d <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character'))
+d_raw <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character', 'logical', 'logical', 'logical'))
+d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 ```
 
-Finally, pass the sample data to the parser
+Finally, pass the sample data to the parser (use `help(gar_parse)` )
 ```R
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 ```
 
-The command `print(res)` should show the following output (one fixation and two saccades):
+## Basic Concept
 
-```R
-$fixations
-  sx sy       px       py       pz duration timestamp trial_id  label
-1  0  0 499.8182 499.3636 499.7273 166.6667  1083.333        0 static
+The library mainly provides the function `gar_parse` to parse gaze data for fixations and saccades.
+The function accepts vectors which must be all of the same length.
+Note that some arguments are optional and also accept `NULL`.
 
-$saccades
-  start_screen_x start_screen_y start_x start_y start_z dest_screen_x dest_screen_y dest_x dest_y dest_z duration timestamp trial_id  label
-1              0              0     300     300     500             0             0    500    500    500 33.33333      1050        0 static
-2              0              0     501     499     500             0             0    600    600    500 16.66667      1250        0 static
-```
+The function expects a pointer to a gaze data handler which can be created with `gar_create()`.
+`gar_create()` accepts an optional filter parameter structure to configure filters.
+Use `gar_get_filter_parameter_default()` to create a filter structure.
+Refer to the documentation (`help(gar_get_filter_parameter_default)`) for more information one each parameter value.
+
+The function `gar_get_filter_parameter()` returns the currently used parameter structure.
+
+### Detection Algorithm
+
+Fixations are detected with the I-DT algorithm (Salvucci & Goldberg 2000).
+Saccades are detected with the I-VT algorithm (Salvucci & Goldberg 2000).
+
+Note that the resulting fixations and saccades will **not** fit together perfectly (e.g. a saccade follows a fixation and vice versa) because
+1. both algorithms work with their own parameters which will most likely lead to gaps (data which is neither classified as part of a fixation nor saccade)
+2. gaze data may be a recording of a smooth pursuit
+3. gaps in the gaze data because of blinks or other data loss
+
+Refer to the documentation (`help(gar_get_filter_parameter_default)`) for more information one each parameter value.
+
+### Filters
+
+Optionally the gaze data is processed by
+1. a moving average filter which computes the average of all samples in the filters own sliding window. Sample annotations (e.g. the label, trial ID, and timestamps) are copied from the data sample in the middle of the sliding window.
+2. a gap fill-in filter where data samples are filled into gaps using linear interpolation.
+
+Refer to the documentation (`help(gar_get_filter_parameter_default)`) for more information one each parameter value.
+
+### 3d vs 2d Data
+
+All calculations are performed on 3d data.
+If only 2d data is available this library cannot be used (yet).
+The reason for this is that with 3d data it is possible to compute an accurate dispersion and velocity threshold based on the distance of the gaze origin to the gaze point.
+For 2d data the dispersion and velocity threshold would need to be estimated based on the measured data which is not (yet) supported by the library.
+
+However, it is possible to provide 2d data alongside 3d data for each data sample which will propagated to fixation and saccade result structures.
+
+If 2d data is not available it is possible to compute the 2d data automatically.
+To do this it is necessary to provide the gaze analysis handler with the exact position of the screen in 3d space.
+Use the function `gar_set_screen()` to set the screen coordinates.
+Note that this has no effect if 2d data are passed to `gar_parse()` as in this case the 2d data from the source are used.
+
+### Sample annotations
+
+Each sample has two fields available for custom data annotation:
+ - `trial_id`: expects an integer number and can be used to e.g. associate a data point to a trial.
+ - `label`: expects a string and can be used to e.g. describe the currently displayed stimuli.
+
+The annotations are propagated to the fixation and saccade result structures.
+
+Further, each sample has two additional timestamp fields for onset information of the annotations:
+ - `trial_onset`: the amount of milliseconds since the last change in the field `trial_id`.
+ - `label_onset`: the amount of milliseconds since the last change in the field `label`.
 
 ## Create an R Package
 

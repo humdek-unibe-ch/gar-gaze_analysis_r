@@ -21,43 +21,57 @@ gar_parse(h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label)
 
 \item{oz}{A double vector of z cooridnates of the gaze origin}
 
-\item{sx}{A vector holding the x coordinates of the gaze screen point}
+\item{sx}{An optional vector holding the x coordinates of the gaze screen point}
 
-\item{sy}{A vector holding the y coordinates of the gaze screen point}
+\item{sy}{An optional vector holding the y coordinates of the gaze screen point}
 
 \item{timestamp}{A double vector of the relative timestamp in milliseconds}
 
-\item{trial_id}{The ID of the ongoing trial}
+\item{trial_id}{An optional vector holding the ID of the ongoing trial}
 
-\item{label}{An arbitrary label annotating the sample}
+\item{label}{An optional vector holding an arbitrary label annotating each sample}
 }
 \value{
 The identified fixations and saccades as a named list:
 \itemize{
-\item fixations[]:
+\item \code{fixations[]}:
 \itemize{
-\item sx: The x-coordinate of the average screen gaze point during the fixation
-\item sy: The y-coordinate of the average screen gaze point during the fixation
-\item px: The x-coordinate of the average gaze point during the fixation
-\item py: The y-coordinate of the average gaze point during the fixation
-\item pz: The z-coordinate of the average gaze point during the fixation
-\item duration: The fixation duration in milliseconds
-\item timestamp: The relative timestamp of the first gaze point in the
+\item \code{sx}: The x-coordinate of the average screen gaze point during the fixation
+\item \code{sy}: The y-coordinate of the average screen gaze point during the fixation
+\item \code{px}: The x-coordinate of the average gaze point during the fixation
+\item \code{py}: The y-coordinate of the average gaze point during the fixation
+\item \code{pz}: The z-coordinate of the average gaze point during the fixation
+\item \code{duration}: The fixation duration in milliseconds
+\item \code{timestamp}: The relative timestamp of the first gaze point in the
 fixation in milliseconds
-\item trial_id: The rial ID of first sample of the fixation
-\item label: The annotation of the first sample of the fixation
+\item \code{trial_id}: The rial ID of first sample of the fixation
+\item \code{trial_onset}: The timestamp in milliseconds of the first sample of the
+fixation since the last trial ID change
+\item \code{label}: The annotation of the first sample of the fixation
+\item \code{label_onset}: The timestamp in milliseconds of the first sample of the
+fixation since the last label change
 }
-\item saccades[]:
+\item \code{saccades[]}:
 \itemize{
-\item startx: The x-coordinate of the first gaze point in the saccade
-\item starty: The y-coordinate of the first gaze point in the saccade
-\item startz: The z-coordinate of the first gaze point in the saccade
-\item destx: The x-coordinate of the last gaze point in the saccade
-\item desty: The y-coordinate of the last gaze point in the saccade
-\item destz: The z-coordinate of the last gaze point in the saccade
-\item duration: The saccade duration in milliseconds
-\item timestamp: The relative timestamp of the first gaze point in the
+\item \code{start_screen_x}: The x-coordinate of the first screen gaze point in the saccade
+\item \code{start_screen_y}: The y-coordinate of the first screen gaze point in the saccade
+\item \code{start_x}: The x-coordinate of the first gaze point in the saccade
+\item \code{start_y}: The y-coordinate of the first gaze point in the saccade
+\item \code{start_z}: The z-coordinate of the first gaze point in the saccade
+\item \code{dest_screen_x}: The x-coordinate of the last screen point in the saccade
+\item \code{dest_screen_y}: The y-coordinate of the last screen point in the saccade
+\item \code{dest_x}: The x-coordinate of the last gaze point in the saccade
+\item \code{dest_y}: The y-coordinate of the last gaze point in the saccade
+\item \code{dest_z}: The z-coordinate of the last gaze point in the saccade
+\item \code{duration}: The saccade duration in milliseconds
+\item \code{timestamp}: The relative timestamp of the first gaze point in the
 saccade in milliseconds
+\item \code{trial_id}: The rial ID of first sample of the saccade
+\item \code{trial_onset}: The timestamp in milliseconds of the first sample of the
+saccade since the last trial ID change
+\item \code{label}: The annotation of the first sample of the saccade
+\item \code{label_onset}: The timestamp in milliseconds of the first sample of the
+saccade since the last label change
 }
 }
 }

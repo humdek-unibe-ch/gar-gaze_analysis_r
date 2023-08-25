@@ -10,7 +10,9 @@ gar_get_filter_parameter(h)
 \item{h}{A pointer to the gaze analysis handler}
 }
 \value{
-The filter parameters on success or NULL on failure
+The filter parameters on success or NULL on failure.
+For a detalied description of teh parameter values use
+\code{help(gar_get_filter_parameter_default)}
 }
 \description{
 Get the current filter parameters.

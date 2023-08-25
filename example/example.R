@@ -26,5 +26,6 @@ gar_set_screen( h_screen,
                 -298.64031982421875, 331.7396545410156, 113.90633392333984,
                 298.87738037109375, 331.7396545410156, 113.90633392333984,
                 -298.64031982421875, 15.905486106872559, -1.0478993654251099 )
+
 # parse the gaze data and compute 2d data based on the configured screen coordinates
 res_screen <- gar_parse( h_screen, d$px, d$py, d$pz, d$ox, d$oy, d$oz, NULL, NULL, d$timestamp, d$trial_id, d$label )

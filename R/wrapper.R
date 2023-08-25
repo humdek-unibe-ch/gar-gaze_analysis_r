@@ -30,7 +30,9 @@ gar_create <- function( params = NULL )
 #' @param h
 #'  A pointer to the gaze analysis handler
 #' @return
-#'  The filter parameters on success or NULL on failure
+#'  The filter parameters on success or NULL on failure.
+#'  For a detalied description of teh parameter values use
+#'  `help(gar_get_filter_parameter_default)`
 #' @export
 #' @examples
 #'  h <- gar_create()
@@ -45,21 +47,21 @@ gar_get_filter_parameter <- function( h )
 #' @return
 #'  The default filter parameters on success or NULL on failure.
 #'  The parameters are structured as nested named lists:
-#'  - res$gap$max_gap_length:
-#'    The maximal allowed gap length to be filled-in. Set to zero to disable
-#'    gap fill-in filter.
-#'  - res$gap$sample_period:
-#'    The sample period to compute the number of required fill-in samples.
-#'  - res$noise$mid_idx:
-#'    The mid index of the moving average noise filter window. This is used to
-#'    compute the length of the window: window_length = mid_idx * 2 + 1. Set to
-#'    zero to disable noise filtering.
-#'  - res$fixation$duration_threshold:
-#'    The duration threshold in milliseconds.
-#'  - res$fixation$dispersion_threshold:
-#'    The dispersion threshold in degrees.
-#'  - res$saccade$velocity_threshold:
-#'    The velocity threshold in degrees per second.
+#'
+#'  - `gap`: The gap filter parameter
+#'      - `max_gap_length`: The maximal allowed gap length to be filled-in. Set
+#'      to zero to disable gap fill-in filter.
+#'      - `sample_period`: The sample period to compute the number of required
+#'      fill-in samples.
+#'  - `noise`: The noise filter parameter
+#'      - `mid_idx`: The mid index of the moving average noise filter window.
+#'      This is used to compute the length of the window:
+#'      `window_length = mid_idx * 2 + 1`. Set to zero to disable noise filter.
+#'  - `fixation`: The fixation parser parameters
+#'      - `duration_threshold`: The duration threshold in milliseconds.
+#'      - `dispersion_threshold`: The dispersion threshold in degrees.
+#'  - `saccade`: The saccade parser parameters
+#'      - `velocity_threshold`: The velocity threshold in degrees per second.
 #' @export
 #' @examples
 #'  params <- gar_get_filter_parameter_default()
@@ -85,38 +87,52 @@ gar_get_filter_parameter_default <- function()
 #' @param oz
 #'  A double vector of z cooridnates of the gaze origin
 #' @param sx
-#'  A vector holding the x coordinates of the gaze screen point
+#'  An optional vector holding the x coordinates of the gaze screen point
 #' @param sy
-#'  A vector holding the y coordinates of the gaze screen point
+#'  An optional vector holding the y coordinates of the gaze screen point
 #' @param timestamp
 #'  A double vector of the relative timestamp in milliseconds
 #' @param trial_id
-#'  The ID of the ongoing trial
+#'  An optional vector holding the ID of the ongoing trial
 #' @param label
-#'  An arbitrary label annotating the sample
+#'  An optional vector holding an arbitrary label annotating each sample
 #' @return
 #'  The identified fixations and saccades as a named list:
-#'  - fixations[]:
-#'    - sx: The x-coordinate of the average screen gaze point during the fixation
-#'    - sy: The y-coordinate of the average screen gaze point during the fixation
-#'    - px: The x-coordinate of the average gaze point during the fixation
-#'    - py: The y-coordinate of the average gaze point during the fixation
-#'    - pz: The z-coordinate of the average gaze point during the fixation
-#'    - duration: The fixation duration in milliseconds
-#'    - timestamp: The relative timestamp of the first gaze point in the
+#'  - `fixations[]`:
+#'    - `sx`: The x-coordinate of the average screen gaze point during the fixation
+#'    - `sy`: The y-coordinate of the average screen gaze point during the fixation
+#'    - `px`: The x-coordinate of the average gaze point during the fixation
+#'    - `py`: The y-coordinate of the average gaze point during the fixation
+#'    - `pz`: The z-coordinate of the average gaze point during the fixation
+#'    - `duration`: The fixation duration in milliseconds
+#'    - `timestamp`: The relative timestamp of the first gaze point in the
 #'      fixation in milliseconds
-#'    - trial_id: The rial ID of first sample of the fixation
-#'    - label: The annotation of the first sample of the fixation
-#'  - saccades[]:
-#'    - startx: The x-coordinate of the first gaze point in the saccade
-#'    - starty: The y-coordinate of the first gaze point in the saccade
-#'    - startz: The z-coordinate of the first gaze point in the saccade
-#'    - destx: The x-coordinate of the last gaze point in the saccade
-#'    - desty: The y-coordinate of the last gaze point in the saccade
-#'    - destz: The z-coordinate of the last gaze point in the saccade
-#'    - duration: The saccade duration in milliseconds
-#'    - timestamp: The relative timestamp of the first gaze point in the
+#'    - `trial_id`: The rial ID of first sample of the fixation
+#'    - `trial_onset`: The timestamp in milliseconds of the first sample of the
+#'      fixation since the last trial ID change
+#'    - `label`: The annotation of the first sample of the fixation
+#'    - `label_onset`: The timestamp in milliseconds of the first sample of the
+#'      fixation since the last label change
+#'  - `saccades[]`:
+#'    - `start_screen_x`: The x-coordinate of the first screen gaze point in the saccade
+#'    - `start_screen_y`: The y-coordinate of the first screen gaze point in the saccade
+#'    - `start_x`: The x-coordinate of the first gaze point in the saccade
+#'    - `start_y`: The y-coordinate of the first gaze point in the saccade
+#'    - `start_z`: The z-coordinate of the first gaze point in the saccade
+#'    - `dest_screen_x`: The x-coordinate of the last screen point in the saccade
+#'    - `dest_screen_y`: The y-coordinate of the last screen point in the saccade
+#'    - `dest_x`: The x-coordinate of the last gaze point in the saccade
+#'    - `dest_y`: The y-coordinate of the last gaze point in the saccade
+#'    - `dest_z`: The z-coordinate of the last gaze point in the saccade
+#'    - `duration`: The saccade duration in milliseconds
+#'    - `timestamp`: The relative timestamp of the first gaze point in the
 #'      saccade in milliseconds
+#'    - `trial_id`: The rial ID of first sample of the saccade
+#'    - `trial_onset`: The timestamp in milliseconds of the first sample of the
+#'      saccade since the last trial ID change
+#'    - `label`: The annotation of the first sample of the saccade
+#'    - `label_onset`: The timestamp in milliseconds of the first sample of the
+#'      saccade since the last label change
 #' @export
 #' @examples
 #'  h <- gar_create()
@@ -127,8 +143,9 @@ gar_parse <- function( h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, l
     return( .Call( "gar_parse", h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label ) )
 }
 
-#' Configure the screen position in 3d space. This allows to compute 2d
-#' gaze point coordinates.
+#' Configure the screen position in 3d space. If no 2d gaze coordinates are
+#' provided in gar_parse() the screen position will be used to compute 2d gaze
+#' coordinates automatically.
 #'
 #' @param h
 #'  A pointer to the gaze analysis handler.

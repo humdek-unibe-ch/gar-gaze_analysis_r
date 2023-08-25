@@ -2,8 +2,9 @@
 % Please edit documentation in R/wrapper.R
 \name{gar_set_screen}
 \alias{gar_set_screen}
-\title{Configure the screen position in 3d space. This allows to compute 2d
-gaze point coordinates.}
+\title{Configure the screen position in 3d space. If no 2d gaze coordinates are
+provided in gar_parse() the screen position will be used to compute 2d gaze
+coordinates automatically.}
 \usage{
 gar_set_screen(
   h,
@@ -40,8 +41,9 @@ gar_set_screen(
 \item{bottom_left_z}{The z coordinate of the bottom left screen corner.}
 }
 \description{
-Configure the screen position in 3d space. This allows to compute 2d
-gaze point coordinates.
+Configure the screen position in 3d space. If no 2d gaze coordinates are
+provided in gar_parse() the screen position will be used to compute 2d gaze
+coordinates automatically.
 }
 \examples{
  h <- gar_create()

@@ -10,21 +10,28 @@ gar_get_filter_parameter_default()
 The default filter parameters on success or NULL on failure.
 The parameters are structured as nested named lists:
 \itemize{
-\item res$gap$max_gap_length:
-The maximal allowed gap length to be filled-in. Set to zero to disable
-gap fill-in filter.
-\item res$gap$sample_period:
-The sample period to compute the number of required fill-in samples.
-\item res$noise$mid_idx:
-The mid index of the moving average noise filter window. This is used to
-compute the length of the window: window_length = mid_idx * 2 + 1. Set to
-zero to disable noise filtering.
-\item res$fixation$duration_threshold:
-The duration threshold in milliseconds.
-\item res$fixation$dispersion_threshold:
-The dispersion threshold in degrees.
-\item res$saccade$velocity_threshold:
-The velocity threshold in degrees per second.
+\item \code{gap}: The gap filter parameter
+\itemize{
+\item \code{max_gap_length}: The maximal allowed gap length to be filled-in. Set
+to zero to disable gap fill-in filter.
+\item \code{sample_period}: The sample period to compute the number of required
+fill-in samples.
+}
+\item \code{noise}: The noise filter parameter
+\itemize{
+\item \code{mid_idx}: The mid index of the moving average noise filter window.
+This is used to compute the length of the window:
+\code{window_length = mid_idx * 2 + 1}. Set to zero to disable noise filter.
+}
+\item \code{fixation}: The fixation parser parameters
+\itemize{
+\item \code{duration_threshold}: The duration threshold in milliseconds.
+\item \code{dispersion_threshold}: The dispersion threshold in degrees.
+}
+\item \code{saccade}: The saccade parser parameters
+\itemize{
+\item \code{velocity_threshold}: The velocity threshold in degrees per second.
+}
 }
 }
 \description{
