@@ -2,13 +2,13 @@
 # cran.r-project.org/doc/manuals/R-exts.pdf
 
 GAC = gac
-GACLIB = $(GAC)/build/lib/lib$(GAC).a
+GACLIB = $(GAC)/.libs/lib$(GAC).a
 
 CGLM = $(GAC)/cglm
 
 PKG_CFLAGS=
 PKG_CPPFLAGS=-I"$(GAC)/include" -I"$(CGLM)/include"
-PKG_LIBS=-L"$(CGLM)/.libs" "$(GAC)/build/lib/libgac.a" -lcglm -lm
+PKG_LIBS=-L"$(CGLM)/.libs" "$(GAC)/.libs/libgac.a" -lcglm -lm
 
 .PHONY: all $(GACLIB)
 

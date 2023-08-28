@@ -6,6 +6,11 @@
 \usage{
 .onLoad(lib, pkg)
 }
+\arguments{
+\item{lib}{The name of the library}
+
+\item{pkg}{The name of the package}
+}
 \description{
 Executed on load of the library.
 }

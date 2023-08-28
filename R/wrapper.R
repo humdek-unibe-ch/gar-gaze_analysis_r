@@ -1,4 +1,9 @@
 #' Executed on load of the library.
+#'
+#' @param lib
+#'  The name of the library
+#' @param pkg
+#'  The name of the package
 .onLoad <- function( lib, pkg )
 {
     # library.dynam( "gar", pkg, lib )
@@ -9,7 +14,7 @@
 #' If no parameter structure is provided default values are used.
 #' Refer to gac_init() for more information.
 #'
-#' @param parameter
+#' @param params
 #'  An optional filter parameter structure.
 #' @return
 #'  A pointer to the allocated structure or NULL on failure.
@@ -136,8 +141,8 @@ gar_get_filter_parameter_default <- function()
 #' @export
 #' @examples
 #'  h <- gar_create()
-#'  d <- read.csv( 'sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'string') )
-#'  res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
+#'  res <- gar_parse( h, gaze$px, gaze$py, gaze$pz, gaze$ox, gaze$oy, gaze$oz,
+#'          gaze$sx, gaze$sy, gaze$timestamp, gaze$trial_id, gaze$label )
 gar_parse <- function( h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label )
 {
     return( .Call( "gar_parse", h, px, py, pz, ox, oy, oz, sx, sy, timestamp, trial_id, label ) )

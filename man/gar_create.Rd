@@ -9,7 +9,7 @@ Refer to gac_init() for more information.}
 gar_create(params = NULL)
 }
 \arguments{
-\item{parameter}{An optional filter parameter structure.}
+\item{params}{An optional filter parameter structure.}
 }
 \value{
 A pointer to the allocated structure or NULL on failure.

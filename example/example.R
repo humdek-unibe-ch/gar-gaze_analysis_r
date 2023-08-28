@@ -12,7 +12,11 @@ params$fixation$duration_threshold <- 100
 params$fixation$dispersion_threshold <- 0.5
 
 # read the csv sample file and filter the data for all valid gaze samples
-d_raw <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'numeric', 'integer', 'character', 'logical', 'logical', 'logical'))
+d_raw <- read.csv('example/gaze.csv', colClasses=c('numeric', 'numeric', 'numeric',
+                                                     'numeric', 'numeric', 'numeric',
+                                                     'numeric', 'numeric',
+                                                     'numeric', 'integer', 'character',
+                                                     'logical', 'logical', 'logical'))
 d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 
 # create the gaze analysis handler (use 2d data from csv sample file)

@@ -1,2 +1,14 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^build$
+^example$
+^.*\.so$
+^.*\.o$
+^.*\.lo$
+^.*\.la$
+^src/\..*$
+^src/gac/doc$
+^src/gac/example$
+^src/gac/test$
+^src/gac/m4$
+^src/gac/cglm/m4$
