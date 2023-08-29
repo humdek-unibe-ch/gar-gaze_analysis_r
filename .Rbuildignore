@@ -1,7 +1,9 @@
+^LICENSE$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^build$
 ^example$
+^release$
 ^.*\.so$
 ^.*\.o$
 ^.*\.lo$
@@ -12,3 +14,11 @@
 ^src/gac/test$
 ^src/gac/m4$
 ^src/gac/cglm/m4$
+^src/gac/.doxygen$
+^src/gac/.git$
+^src/gac/.ycm_extra_conf.py$
+^src/gac/cglm/.git$
+^src/gac/cglm/.travis.yml$
+^src/gac/src/.dirstamp$
+^src/gac/cglm/.github$
+^src/gac/cglm/.vscode$

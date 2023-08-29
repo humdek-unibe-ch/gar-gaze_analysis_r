@@ -107,29 +107,51 @@ Further, each sample has two additional timestamp fields for onset information o
 
 ## Create an R Package
 
-To create the package bundle with command line run the script `build_linux.sh`
+The easiest way to create an R package is through [RStudio](https://posit.co/download/rstudio-desktop/).
 
 ### Ubuntu
 
-In order for the compilation of the C library to work several packages need to be available.
+Before installing RStudio the following tools need to be installed in order to compile the C library which is contained withing the R package `gar`.
 
 ```sh
 sudo apt install build-essential
 sudo apt install autoconf autogen libtool
 ```
 
-Install R
+In order to allow for automated document generation install
 
 ```sh
-sudo apt install r-base r-base-dev
+sudo apt install texlive-latex-base texlive-fonts-recommended
 ```
 
-Run the build script. This will update the documentation, build the package,
-and move the package to the release folder.
+To install RStudio, first, install R with
 
 ```sh
-./build_linux.sh
+sudo apt install r-base
 ```
+
+Then, download and install the appropriate [RStudio file](https://posit.co/download/rstudio-desktop/).
+
+To build the `gar` package install the following dependencies in R:
+
+```R
+install.packages(c('roxygen2', 'pkgbuild'))
+```
+
+The R `devtools` are not strictly necessary but handy to improve the package building process.
+They to, however, rely on some headers that need to be installed:
+
+```sh
+sudo apt install libcurl4-gnutls-dev libtiff-dev
+```
+
+```R
+install.packages('devtools')
+```
+
+Now everything should be ready to build the package.
+Open the RStudio project file `gar.Rproj` navigate to the build tab (top left corner) and run the *Check* utility.
+If no Errors or Warnings are listed, the package can be build through *More->Build Binary Package* and installed through *Install*.
 
 ### Windwos
 
@@ -147,8 +169,6 @@ pacman -Syyu
 pacman -Sy autogen autoconf automake libtool
 ```
 
-Open The package in RStudio (open the file `gar.Rproj`) and select the tab **Build** in the top left corner.
-Then, select **More** and **Build Binary Package**.
-
-This will produce a file `gar_<version>.zip` in the parent folder.
-Copy this file into the folder **release** of the repository and rename it to `gar_<version>_R_x86_64-pc-windows-gnu.zip`
+Now everything should be ready to build the package.
+Open the RStudio project file `gar.Rproj` navigate to the build tab (top left corner) and run the *Check* utility.
+If no Errors or Warnings are listed, the package can be build through *More->Build Binary Package* and installed through *Install*.

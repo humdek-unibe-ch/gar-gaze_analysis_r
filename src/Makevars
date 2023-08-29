@@ -1,5 +1,6 @@
-# See Section 1.2.1 "Using 'Makevars'" of Writing R Extensions
-# cran.r-project.org/doc/manuals/R-exts.pdf
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 GAC = gac
 GACLIB = $(GAC)/.libs/lib$(GAC).a
@@ -8,15 +9,23 @@ CGLM = $(GAC)/cglm
 
 PKG_CFLAGS=
 PKG_CPPFLAGS=-I"$(GAC)/include" -I"$(CGLM)/include"
-PKG_LIBS=-L"$(CGLM)/.libs" "$(GAC)/.libs/libgac.a" -lcglm -lm
+PKG_LIBS="$(GAC)/.libs/libgac.a" -lm
 
-.PHONY: all $(GACLIB)
+.PHONY: $(GAC)/configure clean
 
 all: clean $(SHLIB)
 $(SHLIB): $(GACLIB)
 
-$(GACLIB):
+$(GACLIB): $(GAC)/Makefile
 	(cd $(GAC); $(MAKE))
 
-clean:
+$(GAC)/Makefile: $(GAC)/configure
+	(cd $(GAC); ./configure)
 	(cd $(GAC); $(MAKE) clean)
+
+$(GAC)/configure:
+	(cd $(GAC); autoreconf --install)
+
+clean:
+	rm -f $(GAC)/Makefile
+	rm -f $(GAC)/configure

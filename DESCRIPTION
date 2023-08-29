@@ -6,7 +6,7 @@ Date: 2023-08-02
 Author: Simon Maurer <simon.maurer@unibe.ch>
 Maintainer: Simon Maurer <simon.maurer@unibe.ch>
 Description: A package to wrap the gaze analysis library (gac) written in C.
-License: GPL (>= 2)
+License: MPL
 Depends: R (>= 2.14)
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)

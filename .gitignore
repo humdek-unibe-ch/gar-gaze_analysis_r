@@ -1,6 +1,6 @@
 src/gar.so
 src/gar.dll
-src/wrapper.o
+src/*.o
 .Rproj.user
 .RData
 .Rhistory
