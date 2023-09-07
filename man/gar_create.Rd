@@ -2,9 +2,8 @@
 % Please edit documentation in R/wrapper.R
 \name{gar_create}
 \alias{gar_create}
-\title{Allocate the gaze analysis structure on the heap.
-If no parameter structure is provided default values are used.
-Refer to gac_init() for more information.}
+\title{Create a gaze analysis handler. If no parameter structure is provided
+default values are used.}
 \usage{
 gar_create(params = NULL)
 }
@@ -15,9 +14,8 @@ gar_create(params = NULL)
 A pointer to the allocated structure or NULL on failure.
 }
 \description{
-Allocate the gaze analysis structure on the heap.
-If no parameter structure is provided default values are used.
-Refer to gac_init() for more information.
+Create a gaze analysis handler. If no parameter structure is provided
+default values are used.
 }
 \examples{
  h <- gar_create()

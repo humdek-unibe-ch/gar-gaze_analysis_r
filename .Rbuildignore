@@ -22,3 +22,7 @@
 ^src/gac/src/.dirstamp$
 ^src/gac/cglm/.github$
 ^src/gac/cglm/.vscode$
+^src/gac/cglm/src/.dirstamp$
+^src/gac/cglm/src/clipspace/.dirstamp$
+^src/gac/.libs$
+^src/gac/cglm/.libs$

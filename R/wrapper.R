@@ -14,9 +14,52 @@
     .Call( "gar_init" )
 }
 
-#' Allocate the gaze analysis structure on the heap.
-#' If no parameter structure is provided default values are used.
-#' Refer to gac_init() for more information.
+#' Add an arbitrary AOI to the gaze analysis handler in order to enable the AOI
+#' analysis. Use gar_create_aoi() to create the AOI.
+#'
+#' @param h
+#'  A pointer to the gaze analysis handler, holding the filter parameters.
+#' @param aoi
+#'  A pointer to the AOI to add.
+#' @export
+#' @examples
+#'  h <- gar_create()
+#'  x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
+#'  y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
+#'  df <- data.frame( x, y )
+#'  aoi <- gar_create_aoi( df, "myAOI" )
+#'  gar_add_aoi( h, aoi )
+gar_add_aoi <- function( h, aoi )
+{
+    return( .Call( "gar_add_aoi", h, aoi ) )
+}
+
+#' Add an AOI rectangle to the gaze analysis handler in order to enable the
+#' AOI analysis.
+#'
+#' @param h
+#'  A pointer to the gaze analysis handler, holding the filter parameters.
+#' @param x
+#'  The normalized x coordinate of the upper left corner.
+#' @param y
+#'  The normalized y coordinate of the upper left corner.
+#' @param width
+#'  The normalized width of the rectangle.
+#' @param height
+#'  The normalized height of the rectangle.
+#' @param label
+#'  An optional lable describing the AOI.
+#' @export
+#' @examples
+#'  h <- gar_create()
+#'  gar_add_aoi_rectangle( h, 0.1, 0.1, 0.2, 0.2, "myRect" )
+gar_add_aoi_rectangle <- function( h, x, y, width, height, label )
+{
+    return( .Call( "gar_add_aoi_rectangle", h, x, y, width, height, label ) )
+}
+
+#' Create a gaze analysis handler. If no parameter structure is provided
+#' default values are used.
 #'
 #' @param params
 #'  An optional filter parameter structure.
@@ -32,6 +75,25 @@
 gar_create <- function( params = NULL )
 {
     return( .Call( "gar_create", params ) )
+}
+
+#' Create an AOI structure given a list of points.
+#'
+#' @param points
+#'  A data frame holding normalized 2d points.
+#' @param label
+#'  An optional label describing the AOI.
+#' @return
+#'  A pointer to the allocated structure or NULL on failure.
+#' @export
+#' @examples
+#'  x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
+#'  y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
+#'  df <- data.frame( x, y )
+#'  aoi <- gar_create_aoi( df, "myAOI" )
+gar_create_aoi <- function( points, label )
+{
+    return( .Call( "gar_create_aoi", points, label ) )
 }
 
 #' Get the current filter parameters.

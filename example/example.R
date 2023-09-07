@@ -25,6 +25,11 @@ d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 
 # create the gaze analysis handler (use 2d data from csv sample file)
 h <- gar_create( params )
+x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
+y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
+df <- data.frame( x, y )
+aoi <- gar_create_aoi( df, "myAOI" )
+gar_add_aoi( h, aoi )
 # parse the gaze data by passing 2d data along
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 

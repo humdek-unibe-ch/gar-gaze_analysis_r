@@ -6,6 +6,84 @@
 
 #include <Rinternals.h>
 #include "gac.h"
+#include "gac_aoi_collection.h"
+
+/**
+ * Add an AOI to the gaze analysis structure. This enables the AOI analysis on
+ * the added AOI.
+ *
+ * @param ptr
+ *  An external pointer structure pointing to the gac handler.
+ * @param r_aoi
+ *  An external pointer structure pointing to the AOI.
+ * @return
+ *  R_NilValue
+ */
+SEXP gar_add_aoi( SEXP ptr, SEXP r_aoi );
+
+/**
+ * Add an AOI rectanglie to the gaze anlysis structure. This enables the AOI
+ * analysis on the added AOI.
+ *
+ * @param ptr
+ *  An external pointer structure pointing to the gac handler.
+ * @param x
+ *  The normailized x coordinate of the top left corner of the AOI.
+ * @param y
+ *  The normailized y coordinate of the top left corner of the AOI.
+ * @param width
+ *  The normalized width of the AOI.
+ * @param height
+ *  The normalized height of the AOI.
+ * @param label
+ *  An optional label describing the AOI.
+ * @return
+ *  R_NilValue
+ */
+SEXP gar_add_aoi_rectangle( SEXP ptr, SEXP x, SEXP y, SEXP width, SEXP height,
+        SEXP label );
+
+/**
+ * Create a data frame container to hold fixations.
+ *
+ * @param count
+ *  A preliminary count of items to be added to the data frame.
+ * @return
+ *  The data frame.
+ */
+SEXP gar_analysis_frame_create( uint32_t count );
+
+/**
+ * Resize the AOI analysis data frame.
+ *
+ * @param df
+ *  The data frame to rezise.
+ * @param new_length
+ *  The ne length of the data frame
+ */
+void gar_analysis_frame_resize( SEXP df, uint32_t new_length );
+
+/**
+ * Release the protection of the AOI analysis data frame.
+ *
+ * @param df
+ *  The data frame to unprotect.
+ */
+void gar_analysis_frame_unprotect( SEXP df );
+
+/**
+ * Add a new entry to the AOI analysis data frame.
+ *
+ * @param df
+ *  The data frame to update.
+ * @param idx
+ *  A pointer to the row index of the new entry. This is updated from within
+ *  the function.
+ * @param analysis
+ *  The AOI analysis entry to add.
+ */
+void gar_analysis_frame_update( SEXP df, uint32_t* idx,
+        gac_aoi_collection_analysis_result_t* analysis );
 
 /**
  * Allocate the gac handler.
@@ -19,21 +97,20 @@
 SEXP gar_create( SEXP r_params );
 
 /**
- * Given a list of fixations, create a data frame where each row represents a
- * fixation and each column a property of all fixations.
+ * Create an AOI given a data frame of points where each row is a 2d point.
  *
- * @param fixations
- *  A pointer to the fixation list.
- * @param count
- *  The number of fixations.
+ * @param points
+ *  A data frame where each row is a 2d point of the AOI.
+ * @param label
+ *  An optional label describing the AOI.
  * @return
- *  The allocated fixation data frame.
+ *  An external pointer structure which points to the AOI.
  */
-SEXP gar_create_fixation_frame( gac_fixation_t* fixations, uint32_t count );
+SEXP gar_create_aoi( SEXP points, SEXP label );
 
 /**
- * Given a list of saccades, create a data frame where each row represents a
- * saccade and each column a property of all saccades.
+ * Prepare a data frame where each row represents a saccade and each column
+ * a property of all saccades.
  *
  * @param saccades
  *  A pointer to the saccade list.
@@ -53,6 +130,16 @@ SEXP gar_create_saccade_frame( gac_saccade_t* saccades, uint32_t count );
  *  R_NilValue
  */
 SEXP gar_destroy( SEXP ptr );
+
+/**
+ * Destroy an AOI.
+ *
+ * @param ptr
+ *  The external pointer structure pointing to the AOI.
+ * @return
+ *  R_NilValue
+ */
+SEXP gar_destroy_aoi( SEXP ptr );
 
 /**
  * Allocate the filter parameter R structure.
