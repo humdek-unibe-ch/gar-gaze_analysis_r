@@ -53,7 +53,7 @@ gar_add_aoi <- function( h, aoi )
 #' @examples
 #'  h <- gar_create()
 #'  gar_add_aoi_rectangle( h, 0.1, 0.1, 0.2, 0.2, "myRect" )
-gar_add_aoi_rectangle <- function( h, x, y, width, height, label )
+gar_add_aoi_rectangle <- function( h, x, y, width, height, label = NULL )
 {
     return( .Call( "gar_add_aoi_rectangle", h, x, y, width, height, label ) )
 }
@@ -91,7 +91,7 @@ gar_create <- function( params = NULL )
 #'  y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
 #'  df <- data.frame( x, y )
 #'  aoi <- gar_create_aoi( df, "myAOI" )
-gar_create_aoi <- function( points, label )
+gar_create_aoi <- function( points, label = NULL )
 {
     return( .Call( "gar_create_aoi", points, label ) )
 }

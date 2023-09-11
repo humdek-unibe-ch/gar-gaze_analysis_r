@@ -4,7 +4,7 @@
 \alias{gar_create_aoi}
 \title{Create an AOI structure given a list of points.}
 \usage{
-gar_create_aoi(points, label)
+gar_create_aoi(points, label = NULL)
 }
 \arguments{
 \item{points}{A data frame holding normalized 2d points.}

@@ -16,11 +16,11 @@ params$fixation$duration_threshold <- 100
 params$fixation$dispersion_threshold <- 0.5
 
 # read the csv sample file and filter the data for all valid gaze samples
-d_raw <- read.csv('example/gaze.csv', colClasses=c('numeric', 'numeric', 'numeric',
-                                                     'numeric', 'numeric', 'numeric',
-                                                     'numeric', 'numeric',
-                                                     'numeric', 'integer', 'character',
-                                                     'logical', 'logical', 'logical'))
+d_raw <- read.csv('example/gaze.csv', colClasses=c('numeric', 'numeric',
+                                                   'numeric', 'numeric', 'numeric',
+                                                   'numeric', 'numeric', 'numeric',
+                                                   'numeric', 'integer', 'character',
+                                                   'logical', 'logical', 'logical'))
 d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 
 # create the gaze analysis handler (use 2d data from csv sample file)
@@ -28,8 +28,11 @@ h <- gar_create( params )
 x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
 y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
 df <- data.frame( x, y )
-aoi <- gar_create_aoi( df, "myAOI" )
-gar_add_aoi( h, aoi )
+#aoi <- gar_create_aoi( df, "aoi0" )
+#gar_add_aoi( h, aoi )
+gar_add_aoi_rectangle(h, 0.3, 0.45, 0.1, 0.1, "aoi1")
+gar_add_aoi_rectangle(h, 0.5, 0.75, 0.2, 0.2, "aoi2")
+gar_add_aoi_rectangle(h, 0.1, 0.3, 0.2, 0.1, "aoi3")
 # parse the gaze data by passing 2d data along
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 

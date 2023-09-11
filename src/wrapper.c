@@ -48,6 +48,7 @@ SEXP gar_add_aoi_rectangle( SEXP ptr, SEXP x, SEXP y, SEXP width, SEXP height,
     gac_t* h;
     gac_aoi_t aoi;
     CHECK_GAC_HANDLER( ptr );
+    SEXP rlabel;
 
     if( !Rf_isReal( x )
         || !Rf_isReal( y )
@@ -66,9 +67,10 @@ SEXP gar_add_aoi_rectangle( SEXP ptr, SEXP x, SEXP y, SEXP width, SEXP height,
 
     h = R_ExternalPtrAddr( ptr );
     clabel = NULL;
-    if( !Rf_StringBlank( label ) )
+    rlabel = STRING_ELT( label, 0 );
+    if( !Rf_StringBlank( rlabel ) )
     {
-        clabel = CHAR( label );
+        clabel = CHAR( rlabel );
     }
 
     gac_aoi_init( &aoi, clabel );
@@ -102,7 +104,7 @@ SEXP gar_analysis_frame_create( uint32_t count )
     SEXP fixation_count_rel = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP fixation_count = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP aoi_label = PROTECT( Rf_allocVector( STRSXP, count ) );
-    SEXP label_onset_timestamp = PROTECT( Rf_allocVector( STRSXP, count ) );
+    SEXP label_onset_timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
 
     SET_VECTOR_ELT( df, 0, trial_id );
     SET_VECTOR_ELT( df, 1, dwell_time );
@@ -180,7 +182,7 @@ void gar_analysis_frame_update( SEXP df, uint32_t* idx,
         REAL( VECTOR_ELT( df, 5 ) )[*idx] = aoi->first_saccade.first_sample.timestamp;
         REAL( VECTOR_ELT( df, 6 ) )[*idx] = aoi->first_saccade.last_sample.timestamp;
         REAL( VECTOR_ELT( df, 7 ) )[*idx] = aoi->first_saccade.first_sample.label_onset;
-        REAL( VECTOR_ELT( df, 8 ) )[*idx] = aoi->enter_saccade_count;
+        INTEGER( VECTOR_ELT( df, 8 ) )[*idx] = aoi->enter_saccade_count;
         REAL( VECTOR_ELT( df, 9 ) )[*idx] = aoi->fixation_count_relative;
         INTEGER( VECTOR_ELT( df, 10 ) )[*idx] = aoi->fixation_count;
         SET_STRING_ELT( VECTOR_ELT( df, 11 ), *idx, Rf_mkChar( label ) );
@@ -271,7 +273,7 @@ SEXP gar_create_aoi( SEXP points, SEXP label )
 {
     int32_t i;
     void* aoi;
-    SEXP ptr;
+    SEXP ptr, rlabel;
     SEXP x, y;
     double *px, *py;
     const char* clabel;
@@ -298,9 +300,10 @@ SEXP gar_create_aoi( SEXP points, SEXP label )
     }
 
     clabel = NULL;
-    if( !Rf_StringBlank( label ) )
+    rlabel = STRING_ELT( label, 0 );
+    if( !Rf_StringBlank( rlabel ) )
     {
-        clabel = CHAR( label );
+        clabel = CHAR( rlabel );
     }
 
     aoi = gac_aoi_create( clabel );
@@ -374,7 +377,7 @@ SEXP gar_fixation_frame_create( uint32_t count )
     SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP trial_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP trial_id = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP trial_id = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
 
     SET_VECTOR_ELT( df, 0, sx );
@@ -442,7 +445,7 @@ void gar_fixation_frame_update( SEXP df, uint32_t idx,
     REAL( VECTOR_ELT( df, 4 ) )[idx] = fixation->point[2];
     REAL( VECTOR_ELT( df, 5 ) )[idx] = fixation->duration;
     REAL( VECTOR_ELT( df, 6 ) )[idx] = fixation->first_sample.timestamp;
-    REAL( VECTOR_ELT( df, 7 ) )[idx] = fixation->first_sample.trial_id;
+    INTEGER( VECTOR_ELT( df, 7 ) )[idx] = fixation->first_sample.trial_id;
     REAL( VECTOR_ELT( df, 8 ) )[idx] = fixation->first_sample.trial_onset;
     SET_STRING_ELT( VECTOR_ELT( df, 9 ), idx, Rf_mkChar( label ) );
     REAL( VECTOR_ELT( df, 10 ) )[idx] = fixation->first_sample.label_onset;
@@ -595,7 +598,10 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
             if( res )
             {
                 gar_saccade_frame_update( saccades, saccade_count, &saccade );
-                res = gac_aoi_collection_analyse_saccade( &h->aoic, &saccade );
+                if( h->aoic.aois.count > 0 )
+                {
+                    gac_aoi_collection_analyse_saccade( &h->aoic, &saccade );
+                }
                 gac_saccade_destroy( &saccade );
                 saccade_count++;
             }
@@ -619,6 +625,15 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
         gac_sample_window_cleanup( h );
     }
 
+    if( h->aoic.aois.count > 0 )
+    {
+        res = gac_aoi_collection_analyse_finalise( &h->aoic, &analysis );
+        if( res )
+        {
+            gar_analysis_frame_update( aoi, &analysis_count, &analysis );
+        }
+    }
+
     gar_fixation_frame_resize( fixations, fixation_count );
     gar_saccade_frame_resize( saccades, saccade_count );
     if( h->aoic.aois.count > 0 )
@@ -629,6 +644,10 @@ SEXP gar_parse( SEXP ptr, SEXP px, SEXP py, SEXP pz, SEXP ox, SEXP oy, SEXP oz,
     ret = PROTECT( Rf_mkNamed( VECSXP, names ) );
     SET_VECTOR_ELT( ret, 0, fixations );
     SET_VECTOR_ELT( ret, 1, saccades );
+    if( h->aoic.aois.count > 0 )
+    {
+        SET_VECTOR_ELT( ret, 2, aoi );
+    }
     UNPROTECT( 1 );
 
     gar_fixation_frame_unprotect( fixations );
@@ -679,7 +698,7 @@ SEXP gar_saccade_frame_create( uint32_t count )
     SEXP destz = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP duration = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP trial_id = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP trial_id = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP trial_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP label = PROTECT( Rf_allocVector( STRSXP, count ) );
     SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
@@ -765,7 +784,7 @@ void gar_saccade_frame_update( SEXP df, uint32_t idx, gac_saccade_t* saccade )
     REAL( VECTOR_ELT( df, 10 ) )[idx] =
         saccade->last_sample.timestamp - saccade->first_sample.timestamp;
     REAL( VECTOR_ELT( df, 11 ) )[idx] = saccade->first_sample.timestamp;
-    REAL( VECTOR_ELT( df, 12 ) )[idx] = saccade->first_sample.trial_id;
+    INTEGER( VECTOR_ELT( df, 12 ) )[idx] = saccade->first_sample.trial_id;
     REAL( VECTOR_ELT( df, 13 ) )[idx] = saccade->first_sample.trial_onset;
     SET_STRING_ELT( VECTOR_ELT( df, 14 ), idx, Rf_mkChar( label ) );
     REAL( VECTOR_ELT( df, 15 ) )[idx] = saccade->first_sample.label_onset;

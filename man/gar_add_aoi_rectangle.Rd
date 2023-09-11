@@ -5,7 +5,7 @@
 \title{Add an AOI rectangle to the gaze analysis handler in order to enable the
 AOI analysis.}
 \usage{
-gar_add_aoi_rectangle(h, x, y, width, height, label)
+gar_add_aoi_rectangle(h, x, y, width, height, label = NULL)
 }
 \arguments{
 \item{h}{A pointer to the gaze analysis handler, holding the filter parameters.}
