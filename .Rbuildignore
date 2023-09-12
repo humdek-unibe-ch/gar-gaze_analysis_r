@@ -1,4 +1,5 @@
 ^LICENSE$
+^CHANGELOG.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^build$
