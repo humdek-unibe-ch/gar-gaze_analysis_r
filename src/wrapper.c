@@ -16,15 +16,18 @@ static SEXP gac_type_tag;
 } while( 0 )
 
 /******************************************************************************/
-SEXP gar_add_aoi( SEXP ptr, SEXP r_aoi )
+SEXP gar_add_aoi_points( SEXP ptr, SEXP points, SEXP label )
 {
     gac_t* h;
-    gac_aoi_t* aoi;
-    CHECK_GAC_HANDLER( ptr );
-    CHECK_GAC_HANDLER( r_aoi );
+    int32_t i;
+    SEXP rlabel;
+    SEXP x, y;
+    double *px, *py;
+    const char* clabel;
+    gac_aoi_t aoi;
 
+    CHECK_GAC_HANDLER( ptr );
     h = R_ExternalPtrAddr( ptr );
-    aoi = R_ExternalPtrAddr( r_aoi );
 
     if( h == NULL )
     {
@@ -32,10 +35,43 @@ SEXP gar_add_aoi( SEXP ptr, SEXP r_aoi )
         return R_NilValue;
     }
 
-    if( !gac_aoi_collection_add( &h->aoic, aoi ) )
+    if( !Rf_isString( label ) )
     {
-        error( "failed to add AOI to collection" );
+        error( "label needs to be of type string" );
+        return R_NilValue;
     }
+
+    if( !Rf_isFrame( points ) )
+    {
+        error( "AOI points need to be passed as dataframe" );
+        return R_NilValue;
+    }
+
+    x = VECTOR_ELT( points, 0 );
+    y = VECTOR_ELT( points, 1 );
+
+    if( !Rf_isNumber( x ) || !Rf_isNumber( y ) )
+    {
+        error( "AOI point coordinates need to be numbers" );
+        return R_NilValue;
+    }
+
+    clabel = NULL;
+    rlabel = STRING_ELT( label, 0 );
+    if( !Rf_StringBlank( rlabel ) )
+    {
+        clabel = CHAR( rlabel );
+    }
+
+    gac_aoi_init( &aoi, clabel );
+
+    px = REAL( x );
+    py = REAL( y );
+    for( i = 0; i < Rf_length( x ); i++ )
+    {
+        gac_aoi_add_point( &aoi, px[i], py[i] );
+    }
+    gac_add_aoi( h, &aoi );
 
     return R_NilValue;
 }
@@ -84,42 +120,47 @@ SEXP gar_add_aoi_rectangle( SEXP ptr, SEXP x, SEXP y, SEXP width, SEXP height,
 /******************************************************************************/
 SEXP gar_analysis_frame_create( uint32_t count )
 {
-    const char* names[] = { "trial_id", "dwell_time", "dwell_time_rel",
-        "first_fixation_duration", "prior_aoi_visited_count",
-        "first_saccade_start", "first_saccade_end", "first_saccade_label_onset",
+    const char* names[] = { "trial_id", "trial_timestamp", "dwell_time",
+        "dwell_time_rel", "first_fixation_duration", "first_fixation_onset",
+        "prior_aoi_visited_count", "first_saccade_start_onset",
+        "first_saccade_end_onset", "first_saccade_latency",
         "saccade_enter_count", "fixation_count_rel", "fixation_count",
-        "aoi_label", "label_onset_timestamp", "" };
+        "aoi_name", "label_onset", "" };
 
     SEXP df = PROTECT( Rf_mkNamed( VECSXP, names ) );
 
     SEXP trial_id = PROTECT( Rf_allocVector( INTSXP, count ) );
+    SEXP trial_timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP dwell_time = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP dwell_time_rel = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP first_fixation_duration = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP first_fixation_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP prior_aoi_visited_count = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP first_saccade_start = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP first_saccade_end = PROTECT( Rf_allocVector( REALSXP, count ) );
-    SEXP first_saccade_label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP first_saccade_latency = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP saccade_enter_count = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP fixation_count_rel = PROTECT( Rf_allocVector( REALSXP, count ) );
     SEXP fixation_count = PROTECT( Rf_allocVector( INTSXP, count ) );
     SEXP aoi_label = PROTECT( Rf_allocVector( STRSXP, count ) );
-    SEXP label_onset_timestamp = PROTECT( Rf_allocVector( REALSXP, count ) );
+    SEXP label_onset = PROTECT( Rf_allocVector( REALSXP, count ) );
 
     SET_VECTOR_ELT( df, 0, trial_id );
-    SET_VECTOR_ELT( df, 1, dwell_time );
-    SET_VECTOR_ELT( df, 2, dwell_time_rel );
-    SET_VECTOR_ELT( df, 3, first_fixation_duration );
-    SET_VECTOR_ELT( df, 4, prior_aoi_visited_count );
-    SET_VECTOR_ELT( df, 5, first_saccade_start );
-    SET_VECTOR_ELT( df, 6, first_saccade_end );
-    SET_VECTOR_ELT( df, 7, first_saccade_label_onset );
-    SET_VECTOR_ELT( df, 8, saccade_enter_count );
-    SET_VECTOR_ELT( df, 9, fixation_count_rel );
-    SET_VECTOR_ELT( df, 10, fixation_count );
-    SET_VECTOR_ELT( df, 11, aoi_label );
-    SET_VECTOR_ELT( df, 12, label_onset_timestamp );
-    UNPROTECT( 13 );
+    SET_VECTOR_ELT( df, 1, trial_timestamp );
+    SET_VECTOR_ELT( df, 2, dwell_time );
+    SET_VECTOR_ELT( df, 3, dwell_time_rel );
+    SET_VECTOR_ELT( df, 4, first_fixation_duration );
+    SET_VECTOR_ELT( df, 5, first_fixation_onset );
+    SET_VECTOR_ELT( df, 6, prior_aoi_visited_count );
+    SET_VECTOR_ELT( df, 7, first_saccade_start );
+    SET_VECTOR_ELT( df, 8, first_saccade_end );
+    SET_VECTOR_ELT( df, 9, first_saccade_latency );
+    SET_VECTOR_ELT( df, 10, saccade_enter_count );
+    SET_VECTOR_ELT( df, 11, fixation_count_rel );
+    SET_VECTOR_ELT( df, 12, fixation_count );
+    SET_VECTOR_ELT( df, 13, aoi_label );
+    SET_VECTOR_ELT( df, 14, label_onset );
+    UNPROTECT( 15 );
 
     SET_CLASS( df, mkString( "data.frame" ) );
 
@@ -148,6 +189,8 @@ void gar_analysis_frame_resize( SEXP df, uint32_t new_length )
     SETLENGTH( VECTOR_ELT( df, 10 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 11 ), new_length );
     SETLENGTH( VECTOR_ELT( df, 12 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 13 ), new_length );
+    SETLENGTH( VECTOR_ELT( df, 14 ), new_length );
 
     SEXP rownames = PROTECT( allocVector( INTSXP, 2 ) );
     SET_INTEGER_ELT( rownames, 0, NA_INTEGER );
@@ -169,24 +212,49 @@ void gar_analysis_frame_update( SEXP df, uint32_t* idx,
     const char* label;
     uint32_t i;
     gac_aoi_analysis_t* aoi = NULL;
+    double trial_timestamp;
+    double label_timestamp;
+    double first_saccade_start_onset;
+    double first_saccade_end_onset;
+    double first_saccade_latency;
+    double first_fixation_onset;
+    double label_onset;
 
     for( i = 0; i < analysis->aois.count; i++ )
     {
         aoi = &analysis->aois.items[i].analysis;
         label = analysis->aois.items[i].label;
+        trial_timestamp = gac_sample_get_trial_timestamp(
+                &aoi->first_fixation.first_sample );
+        label_timestamp = gac_sample_get_label_timestamp(
+                &aoi->first_fixation.first_sample );
+        first_saccade_start_onset = gac_sample_get_onset(
+                &aoi->first_saccade.first_sample, trial_timestamp );
+        first_saccade_end_onset = gac_sample_get_onset(
+                &aoi->first_saccade.last_sample, trial_timestamp );
+        first_fixation_onset = gac_sample_get_onset(
+                &aoi->first_fixation.first_sample, trial_timestamp );
+        label_onset = label_timestamp - trial_timestamp;
+        if( label_onset < 0 )
+        {
+            label_onset = 0;
+        }
+        first_saccade_latency = first_saccade_start_onset - label_onset;
         INTEGER( VECTOR_ELT( df, 0 ) )[*idx] = analysis->trial_id;
-        REAL( VECTOR_ELT( df, 1 ) )[*idx] = aoi->dwell_time;
-        REAL( VECTOR_ELT( df, 2 ) )[*idx] = aoi->dwell_time_relative;
-        REAL( VECTOR_ELT( df, 3 ) )[*idx] = aoi->first_fixation.duration;
-        INTEGER( VECTOR_ELT( df, 4 ) )[*idx] = aoi->aoi_visited_before_count;
-        REAL( VECTOR_ELT( df, 5 ) )[*idx] = aoi->first_saccade.first_sample.timestamp;
-        REAL( VECTOR_ELT( df, 6 ) )[*idx] = aoi->first_saccade.last_sample.timestamp;
-        REAL( VECTOR_ELT( df, 7 ) )[*idx] = aoi->first_saccade.first_sample.label_onset;
-        INTEGER( VECTOR_ELT( df, 8 ) )[*idx] = aoi->enter_saccade_count;
-        REAL( VECTOR_ELT( df, 9 ) )[*idx] = aoi->fixation_count_relative;
-        INTEGER( VECTOR_ELT( df, 10 ) )[*idx] = aoi->fixation_count;
-        SET_STRING_ELT( VECTOR_ELT( df, 11 ), *idx, Rf_mkChar( label ) );
-        REAL( VECTOR_ELT( df, 12 ) )[*idx] = aoi->first_fixation.first_sample.timestamp - aoi->first_fixation.first_sample.label_onset;
+        REAL( VECTOR_ELT( df, 1 ) )[*idx] = trial_timestamp;
+        REAL( VECTOR_ELT( df, 2 ) )[*idx] = aoi->dwell_time;
+        REAL( VECTOR_ELT( df, 3 ) )[*idx] = aoi->dwell_time_relative;
+        REAL( VECTOR_ELT( df, 4 ) )[*idx] = aoi->first_fixation.duration;
+        REAL( VECTOR_ELT( df, 5 ) )[*idx] = first_fixation_onset;
+        INTEGER( VECTOR_ELT( df, 6 ) )[*idx] = aoi->aoi_visited_before_count;
+        REAL( VECTOR_ELT( df, 7 ) )[*idx] = first_saccade_start_onset;
+        REAL( VECTOR_ELT( df, 8 ) )[*idx] = first_saccade_end_onset;
+        REAL( VECTOR_ELT( df, 9 ) )[*idx] = first_saccade_latency;
+        INTEGER( VECTOR_ELT( df, 10 ) )[*idx] = aoi->enter_saccade_count;
+        REAL( VECTOR_ELT( df, 11 ) )[*idx] = aoi->fixation_count_relative;
+        INTEGER( VECTOR_ELT( df, 12 ) )[*idx] = aoi->fixation_count;
+        SET_STRING_ELT( VECTOR_ELT( df, 13 ), *idx, Rf_mkChar( label ) );
+        REAL( VECTOR_ELT( df, 14 ) )[*idx] = label_onset;
         ( *idx )++;
     }
 }
@@ -264,63 +332,6 @@ SEXP gar_create( SEXP r_params )
 
     ptr = R_MakeExternalPtr( h, gac_type_tag, R_NilValue );
     R_RegisterCFinalizer( ptr, ( R_CFinalizer_t )gar_destroy );
-
-    return ptr;
-}
-
-/******************************************************************************/
-SEXP gar_create_aoi( SEXP points, SEXP label )
-{
-    int32_t i;
-    void* aoi;
-    SEXP ptr, rlabel;
-    SEXP x, y;
-    double *px, *py;
-    const char* clabel;
-
-    if( !Rf_isString( label ) )
-    {
-        error( "label needs to be of type string" );
-        return R_NilValue;
-    }
-
-    if( !Rf_isFrame( points ) )
-    {
-        error( "AOI points need to be passed as dataframe" );
-        return R_NilValue;
-    }
-
-    x = VECTOR_ELT( points, 0 );
-    y = VECTOR_ELT( points, 1 );
-
-    if( !Rf_isNumber( x ) || !Rf_isNumber( y ) )
-    {
-        error( "AOI point coordinates need to be numbers" );
-        return R_NilValue;
-    }
-
-    clabel = NULL;
-    rlabel = STRING_ELT( label, 0 );
-    if( !Rf_StringBlank( rlabel ) )
-    {
-        clabel = CHAR( rlabel );
-    }
-
-    aoi = gac_aoi_create( clabel );
-    if( aoi == NULL )
-    {
-        return R_NilValue;
-    }
-
-    ptr = R_MakeExternalPtr( aoi, gac_type_tag, R_NilValue );
-    R_RegisterCFinalizer( ptr, ( R_CFinalizer_t )gar_destroy_aoi );
-
-    px = REAL( x );
-    py = REAL( y );
-    for( i = 0; i < Rf_length( x ); i++ )
-    {
-        gac_aoi_add_point( aoi, px[i], py[i] );
-    }
 
     return ptr;
 }

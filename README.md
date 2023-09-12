@@ -41,10 +41,31 @@ d_raw <- read.csv('example/sample.csv', colClasses=c('numeric', 'numeric', 'nume
 d <- subset(d_raw, svalid == TRUE & pvalid == TRUE & ovalid == TRUE)
 ```
 
+An AOI analysis can be enabled by adding AOIs to the gaze analysis handler.
+This can be an arbitrary AOI defined by a sequence of normalized 2d points:
+
+```R
+x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
+y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
+df <- data.frame( x, y )
+aoi <- gar_add_aoi_points( h, df, "my_circular_aoi" )
+```
+
+A simpler, rectangular AOI can be added as follows:
+
+```R
+gar_add_aoi_rectangle(h, 0.3, 0.45, 0.1, 0.1, "my_rectangular_aoi")
+```
+
 Finally, pass the sample data to the parser (use `help(gar_parse)` )
 ```R
 res <- gar_parse( h, d$px, d$py, d$pz, d$ox, d$oy, d$oz, d$sx, d$sy, d$timestamp, d$trial_id, d$label )
 ```
+
+The result holds three data tables:
+- `fixations`: fixations detected with the I-DT algorithm (Salvucci & Goldberg 2000)
+- `saccades`: saccades detected with the I-VT algorithm (Salvucci & Goldberg 2000)
+- `aoi`: area of interest analysis based on the detected fixations and saccades
 
 ## Basic Concept
 
@@ -104,6 +125,24 @@ The annotations are propagated to the fixation and saccade result structures.
 Further, each sample has two additional timestamp fields for onset information of the annotations:
  - `trial_onset`: the amount of milliseconds since the last change in the field `trial_id`.
  - `label_onset`: the amount of milliseconds since the last change in the field `label`.
+
+### Area of Interest (AOI) Analysis
+
+The area of interest (AOI) analysis is performed based on fixations.
+Saccade information can also be used to extend the analysis but fixations are always required.
+For each distinct trial ID block an analysis of each AOI is performed.
+
+The `trial_timestamp` in the AOI analysis result is the timestamp of the last trial ID change.
+All other time information of the AOI analysis is an onset with the `trial_timestamp` as reference.
+The `label_timestamp` is not directly reported in the analysis result but it is used to compute the `label_onset` and the `first_saccade_latency`.
+It is the timestamp of the last sample annotation label change (it has nothing to do with the AOI name).
+Use the sample annotation label to mark an interesting point in the trial progression (e.g. change the label when an image is shown to the participant).
+
+To decide whether a sample point is inside an AOI a ray casting method is used where a virtual ray is drawn from an arbitrary point outside the AOI to the sample point.
+Then, every intersection with segments of the AOI contour is counted.
+If an even number of intersection is detected, the point lies outside of the AOI, otherwise the point lies inside the AOI.
+To improve performance, a coarse detection using a rectangular a bounding box is performed (if the sample point lies outside the bounding box it also lies outside the AOI).
+
 
 ## Create an R Package
 

@@ -8,7 +8,7 @@ AOI analysis.}
 gar_add_aoi_rectangle(h, x, y, width, height, label = NULL)
 }
 \arguments{
-\item{h}{A pointer to the gaze analysis handler, holding the filter parameters.}
+\item{h}{A pointer to the gaze analysis handler.}
 
 \item{x}{The normalized x coordinate of the upper left corner.}
 

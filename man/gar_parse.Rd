@@ -73,6 +73,33 @@ saccade since the last trial ID change
 \item \code{label_onset}: The timestamp in milliseconds of the first sample of the
 saccade since the last label change
 }
+\item \code{aoi[]}:
+\itemize{
+\item \code{trial_id}: the active trial ID
+\item \code{trial_timestamp}: the timestamp of the trial in milliseconds.
+\item \code{dwell_time}: The sum of all fixation durations on the AOI.
+\item \code{dwell_time_rel}: The relative trial time spent on the AOI. \code{1} is the
+sum of all fixation durations within the trial interest period. The
+trial interest period corresponds to all samples with the same trial ID.
+\item \code{first_fixation_duration}: The duration of the first fixation on the
+AOI.
+\item \code{prior_aoi_visited_count}: The number of different AOIs visited before
+the first fixation hit this AOI.
+\item \code{first_saccade_start_onset}: The time in millisconds from the trial
+\item \code{first_saccade_end_onset}: The time in millisconds from the trial
+\item \code{first_saccade_latency}: The time in millisconds from the
+label_timestamp (the time of the label change) to the start of the first
+saccade of the AOI.
+\item \code{saccade_enter_count}: The number of saccades entering the AOI.
+\item \code{fixation_count_rel}: The relative number of fixations in this AOI
+where \code{1} is the number of all fixations within the trial interest
+period. The trial interest period corresponds to all samples with the
+same trial ID.
+\item \code{fixation_count}: The number of fixations in this AOI.
+\item \code{aoi_name}: The label of the AOI.
+\item \code{label_onset}: The time in milliseconds from the trial start
+(trial_timestamp) to the label_timestamp (the time of the label change).
+}
 }
 }
 \description{

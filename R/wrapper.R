@@ -14,31 +14,32 @@
     .Call( "gar_init" )
 }
 
-#' Add an arbitrary AOI to the gaze analysis handler in order to enable the AOI
-#' analysis. Use gar_create_aoi() to create the AOI.
+#' Add an AOI defined by points to the gaze analysis handler in order to enable
+#' the AOI analysis.
 #'
 #' @param h
-#'  A pointer to the gaze analysis handler, holding the filter parameters.
-#' @param aoi
-#'  A pointer to the AOI to add.
+#'  A pointer to the gaze analysis handler.
+#' @param points
+#'  A data frame holding normalized 2d points.
+#' @param label
+#'  An optional label describing the AOI.
 #' @export
 #' @examples
 #'  h <- gar_create()
 #'  x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
 #'  y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
 #'  df <- data.frame( x, y )
-#'  aoi <- gar_create_aoi( df, "myAOI" )
-#'  gar_add_aoi( h, aoi )
-gar_add_aoi <- function( h, aoi )
+#'  gar_add_aoi_points( h, df, "myAOI" )
+gar_add_aoi_points <- function( h, points, label = NULL )
 {
-    return( .Call( "gar_add_aoi", h, aoi ) )
+    return( .Call( "gar_add_aoi_points", h, points, label ) )
 }
 
 #' Add an AOI rectangle to the gaze analysis handler in order to enable the
 #' AOI analysis.
 #'
 #' @param h
-#'  A pointer to the gaze analysis handler, holding the filter parameters.
+#'  A pointer to the gaze analysis handler.
 #' @param x
 #'  The normalized x coordinate of the upper left corner.
 #' @param y
@@ -75,25 +76,6 @@ gar_add_aoi_rectangle <- function( h, x, y, width, height, label = NULL )
 gar_create <- function( params = NULL )
 {
     return( .Call( "gar_create", params ) )
-}
-
-#' Create an AOI structure given a list of points.
-#'
-#' @param points
-#'  A data frame holding normalized 2d points.
-#' @param label
-#'  An optional label describing the AOI.
-#' @return
-#'  A pointer to the allocated structure or NULL on failure.
-#' @export
-#' @examples
-#'  x <- c( 0.5, 0.5, 0.6, 0.7, 0.8, 0.8, 0.7, 0.6 )
-#'  y <- c( 0.4, 0.3, 0.2, 0.2, 0.3, 0.4, 0.5, 0.5 )
-#'  df <- data.frame( x, y )
-#'  aoi <- gar_create_aoi( df, "myAOI" )
-gar_create_aoi <- function( points, label = NULL )
-{
-    return( .Call( "gar_create_aoi", points, label ) )
 }
 
 #' Get the current filter parameters.
@@ -204,6 +186,33 @@ gar_get_filter_parameter_default <- function()
 #'    - `label`: The annotation of the first sample of the saccade
 #'    - `label_onset`: The timestamp in milliseconds of the first sample of the
 #'      saccade since the last label change
+#'  - `aoi[]`:
+#'    - `trial_id`: the active trial ID
+#'    - `trial_timestamp`: the timestamp of the trial in milliseconds.
+#'    - `dwell_time`: The sum of all fixation durations on the AOI.
+#'    - `dwell_time_rel`: The relative trial time spent on the AOI. `1` is the
+#'      sum of all fixation durations within the trial interest period. The
+#'      trial interest period corresponds to all samples with the same trial ID.
+#'    - `first_fixation_duration`: The duration of the first fixation on the
+#'      AOI.
+#'    - `prior_aoi_visited_count`: The number of different AOIs visited before
+#'      the first fixation hit this AOI.
+#'    - `first_saccade_start_onset`: The time in millisconds from the trial
+#  '    start (trial_timestamp) to the start of the first saccade of the AOI.
+#'    - `first_saccade_end_onset`: The time in millisconds from the trial
+#  '    start (trial_timestamp) to the end of the first saccade of the AOI.
+#'    - `first_saccade_latency`: The time in millisconds from the
+#'      label_timestamp (the time of the label change) to the start of the first
+#'      saccade of the AOI.
+#'    - `saccade_enter_count`: The number of saccades entering the AOI.
+#'    - `fixation_count_rel`: The relative number of fixations in this AOI
+#'      where `1` is the number of all fixations within the trial interest
+#'      period. The trial interest period corresponds to all samples with the
+#'      same trial ID.
+#'    - `fixation_count`: The number of fixations in this AOI.
+#'    - `aoi_name`: The label of the AOI.
+#'    - `label_onset`: The time in milliseconds from the trial start
+#'      (trial_timestamp) to the label_timestamp (the time of the label change).
 #' @export
 #' @examples
 #'  h <- gar_create()

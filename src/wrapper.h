@@ -9,20 +9,22 @@
 #include "gac_aoi_collection.h"
 
 /**
- * Add an AOI to the gaze analysis structure. This enables the AOI analysis on
- * the added AOI.
+ * Add an AOI defined by points to the gaze anlysis structure. This enables the
+ * AOI analysis on the added AOI.
  *
  * @param ptr
  *  An external pointer structure pointing to the gac handler.
- * @param r_aoi
- *  An external pointer structure pointing to the AOI.
+ * @param points
+ *  A data frame where each row is a normalized 2d point of the AOI.
+ * @param label
+ *  An optional label describing the AOI.
  * @return
  *  R_NilValue
  */
-SEXP gar_add_aoi( SEXP ptr, SEXP r_aoi );
+SEXP gar_add_aoi_points( SEXP ptr, SEXP points, SEXP label );
 
 /**
- * Add an AOI rectanglie to the gaze anlysis structure. This enables the AOI
+ * Add an AOI rectangle to the gaze anlysis structure. This enables the AOI
  * analysis on the added AOI.
  *
  * @param ptr
@@ -95,18 +97,6 @@ void gar_analysis_frame_update( SEXP df, uint32_t* idx,
  *  An external pointer structure which points to the gac handler.
  */
 SEXP gar_create( SEXP r_params );
-
-/**
- * Create an AOI given a data frame of points where each row is a 2d point.
- *
- * @param points
- *  A data frame where each row is a 2d point of the AOI.
- * @param label
- *  An optional label describing the AOI.
- * @return
- *  An external pointer structure which points to the AOI.
- */
-SEXP gar_create_aoi( SEXP points, SEXP label );
 
 /**
  * Prepare a data frame where each row represents a saccade and each column
