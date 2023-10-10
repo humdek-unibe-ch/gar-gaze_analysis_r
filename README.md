@@ -1,6 +1,6 @@
 # `gar`: R Bindings for `libgac`
 
-This repository holds an R package which implements the bindings to the gaze analysis library [gac](http://phhum-a209-cp.unibe.ch:10012/LIB/LIB-gaze_analysis_c).
+This repository holds an R package which implements the bindings to the gaze analysis library [gac](https://github.com/humdek-unibe-ch/gac-gaze_analysis_c).
 
 Note that bindings were only created for high level functions to parse for fixations and saccades.
 Filters can be controlled through the filter parameter structure.
