@@ -1,13 +1,21 @@
 # Changelog
 
-## `v0.2.1` (latest)
+## `v0.3.0` (latest)
+
+### Changes
+
+* Update to `libgac` version `v0.3.0`.
+
+
+-------------------
+## `v0.2.1`
 
 ### Changes
 
 * Update to `libgac` version `v0.2.3`.
 
--------------------
 
+-------------------
 ## `v0.2.0`
 
 ### New Features
